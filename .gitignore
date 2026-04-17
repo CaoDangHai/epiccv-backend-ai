@@ -1,0 +1,79 @@
+# --- BẢO MẬT (CỰC KỲ QUAN TRỌNG) ---
+# Giấu các file chứa API Key của Gemini và mật khẩu Database
+.env
+.env.local
+.env.*
+!.env.example
+
+# --- PYTHON ---
+# Bỏ qua các file rác sinh ra trong quá trình chạy code Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- MÔI TRƯỜNG ẢO (VIRTUAL ENVIRONMENTS) ---
+# Poetry tự quản lý trong .venv, cần ignore để không đẩy lên GitHub
+.venv/
+venv/
+ENV/
+env/
+active_node
+bin/
+include/
+lib/
+share/
+
+# --- TRÌNH SOẠN THẢO (IDE) ---
+# Cấu hình riêng của VS Code hoặc PyCharm
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- DATABASE & LOGS ---
+# Không đẩy các file dữ liệu tạm hoặc file log lên
+*.log
+*.sql
+*.sqlite
+.database
+
+# --- HỆ ĐIỀU HÀNH (OS) ---
+# Các file rác của Windows/Mac
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# --- TESTING ---
+# Kết quả chạy test tự động
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
