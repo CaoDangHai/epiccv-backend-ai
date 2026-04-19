@@ -1,0 +1,92 @@
+**JOHN DOE**
+Backend Engineer (Middle Level)
+Email: [john.doe@email.com](mailto:john.doe@email.com) | Phone: +84 123 456 789
+Location: Da Nang, Vietnam
+GitHub: github.com/johndoe | LinkedIn: linkedin.com/in/johndoe
+
+---
+
+### **PROFESSIONAL SUMMARY**
+
+Backend Engineer with 3+ years of experience designing, developing, and maintaining scalable server-side applications. Strong background in RESTful APIs, microservices architecture, and database optimization. Passionate about clean code, performance tuning, and building reliable systems.
+
+---
+
+### **TECHNICAL SKILLS**
+
+* **Languages:** C#, Java, Python
+* **Frameworks:** .NET Core, ASP.NET, Spring Boot
+* **Databases:** PostgreSQL, MySQL, MongoDB
+* **Architecture:** Microservices, Monolith, Clean Architecture
+* **Tools:** Docker, Git, Redis, Kafka
+* **Cloud:** AWS (EC2, S3), Azure
+* **Other:** REST API Design, Authentication (JWT, OAuth2)
+
+---
+
+### **WORK EXPERIENCE**
+
+**Backend Engineer**
+ABC Tech Company | Jun 2023 – Present
+
+* Designed and developed scalable REST APIs using ASP.NET Core.
+* Improved system performance by 30% through query optimization and caching (Redis).
+* Built microservices architecture handling over 50k daily requests.
+* Integrated third-party APIs for payment and authentication systems.
+* Collaborated with frontend and DevOps teams to deploy CI/CD pipelines.
+
+**Junior Backend Developer**
+XYZ Solutions | Jan 2022 – May 2023
+
+* Developed backend modules for e-commerce platform.
+* Maintained and optimized PostgreSQL database queries.
+* Implemented authentication and authorization using JWT.
+* Fixed bugs and improved system stability.
+
+---
+
+### **PROJECTS**
+
+**E-Commerce Backend System**
+
+* Built scalable backend using ASP.NET Core and PostgreSQL.
+* Implemented product, order, and user management modules.
+* Integrated payment gateway and real-time notifications.
+
+**Real-Time Chat Application**
+
+* Developed backend using WebSocket and Node.js.
+* Designed message queue system using Redis.
+
+---
+
+### **EDUCATION**
+
+Bachelor of Information Technology
+University of Science and Technology
+Graduated: 2022
+
+---
+
+### **CERTIFICATIONS**
+
+* Microsoft Certified: Azure Fundamentals
+* AWS Certified Cloud Practitioner
+
+---
+
+### **SOFT SKILLS**
+
+* Problem-solving
+* Team collaboration
+* Communication
+* Time management
+
+---
+
+### **LANGUAGES**
+
+* English: Intermediate (B2)
+* Vietnamese: Native
+
+---

@@ -1,0 +1,81 @@
+**JOB DESCRIPTION – MIDDLE BACKEND ENGINEER (PYTHON / FASTAPI)**
+
+**Company:** EpicCV AI
+**Location:** Remote / Hybrid
+**Employment Type:** Full-time
+
+---
+
+### **1. Overview**
+
+We are looking for a Middle Backend Engineer to join our engineering team and build scalable, high-performance backend systems for an AI-powered CV analysis platform. You will work closely with frontend developers, AI engineers, and product managers to deliver robust APIs and services.
+
+---
+
+### **2. Responsibilities**
+
+* Design, develop, and maintain backend services using Python (FastAPI).
+* Build RESTful APIs for CV parsing, job matching, and AI-based recommendations.
+* Integrate third-party APIs (LLMs, authentication, storage services).
+* Optimize application performance, scalability, and reliability.
+* Work with databases (PostgreSQL) and design efficient schemas.
+* Implement authentication, authorization, and security best practices.
+* Write clean, maintainable, and testable code.
+* Collaborate with cross-functional teams in an Agile environment.
+* Debug and troubleshoot production issues.
+
+---
+
+### **3. Requirements**
+
+* 2–4 years of experience in backend development.
+* Strong experience with Python and FastAPI (or similar frameworks like Django/Flask).
+* Solid understanding of RESTful API design.
+* Experience with relational databases (PostgreSQL, MySQL).
+* Familiarity with Docker and containerized environments.
+* Understanding of Git workflows and version control.
+* Basic knowledge of cloud services (AWS, GCP, or Azure).
+* Good problem-solving and debugging skills.
+
+---
+
+### **4. Nice to Have**
+
+* Experience with AI/ML integrations (OpenAI, LLM APIs).
+* Knowledge of message queues (RabbitMQ, Kafka).
+* Experience with microservices architecture.
+* Familiarity with CI/CD pipelines.
+* Experience with Elasticsearch or vector databases.
+
+---
+
+### **5. Tech Stack**
+
+* **Backend:** Python, FastAPI
+* **Database:** PostgreSQL
+* **DevOps:** Docker, GitHub Actions
+* **Cloud:** AWS / GCP
+* **Others:** Redis, Celery
+
+---
+
+### **6. Benefits**
+
+* Competitive salary based on experience.
+* Opportunity to work on cutting-edge AI products.
+* Flexible working hours.
+* Remote-friendly environment.
+* Career growth and learning opportunities.
+
+---
+
+### **7. How to Apply**
+
+Send your CV and portfolio to: **[hr@epiccv.ai](mailto:hr@epiccv.ai)**
+Subject: **[Backend Engineer Application] - Your Name**
+
+---
+
+### **8. Notes**
+
+We value clean code, system thinking, and ownership. If you enjoy building scalable systems and working with AI-driven products, this role is for you.
