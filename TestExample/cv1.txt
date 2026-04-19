@@ -1,92 +1,83 @@
-**JOHN DOE**
-Backend Engineer (Middle Level)
-Email: [john.doe@email.com](mailto:john.doe@email.com) | Phone: +84 123 456 789
+HENRY NGUYEN (NGUYEN HOANG LONG)
+Senior Backend Engineer
+Email: long.nh92@gmail.com | Phone: +84 905 123 456
 Location: Da Nang, Vietnam
-GitHub: github.com/johndoe | LinkedIn: linkedin.com/in/johndoe
+GitHub: github.com/longdev92 | LinkedIn: linkedin.com/in/longdev92
 
----
+PROFESSIONAL SUMMARY
+Result-oriented Backend Engineer with over 5 years of experience in designing and scaling high-performance server-side applications. Expert in Python (FastAPI) and C# (.NET Core). Deeply interested in AI integration, Retrieval-Augmented Generation (RAG), and vector databases. Proven track record of optimizing database performance and leading small agile teams.
 
-### **PROFESSIONAL SUMMARY**
+CORE COMPETENCIES
+Languages: C#, Python, Java, JavaScript (TypeScript), SQL.
 
-Backend Engineer with 3+ years of experience designing, developing, and maintaining scalable server-side applications. Strong background in RESTful APIs, microservices architecture, and database optimization. Passionate about clean code, performance tuning, and building reliable systems.
+Frameworks: .NET Core 8.0, FastAPI, Spring Boot, Django.
 
----
+Databases: PostgreSQL (advanced JSONB usage), Redis, MongoDB, MS SQL Server.
 
-### **TECHNICAL SKILLS**
+AI/ML Tools: LangChain, OpenAI/Gemini API, Pinecone, ChromaDB.
 
-* **Languages:** C#, Java, Python
-* **Frameworks:** .NET Core, ASP.NET, Spring Boot
-* **Databases:** PostgreSQL, MySQL, MongoDB
-* **Architecture:** Microservices, Monolith, Clean Architecture
-* **Tools:** Docker, Git, Redis, Kafka
-* **Cloud:** AWS (EC2, S3), Azure
-* **Other:** REST API Design, Authentication (JWT, OAuth2)
+Infrastructure: Docker, Kubernetes, AWS (EC2, S3, Lambda), Azure.
 
----
+Messaging: Kafka, RabbitMQ, gRPC.
 
-### **WORK EXPERIENCE**
+WORK EXPERIENCE
+Senior Backend Engineer | TechVina Solutions | June 2022 – Present
 
-**Backend Engineer**
-ABC Tech Company | Jun 2023 – Present
+Architected a logistics management system handling 100k+ daily transactions.
 
-* Designed and developed scalable REST APIs using ASP.NET Core.
-* Improved system performance by 30% through query optimization and caching (Redis).
-* Built microservices architecture handling over 50k daily requests.
-* Integrated third-party APIs for payment and authentication systems.
-* Collaborated with frontend and DevOps teams to deploy CI/CD pipelines.
+Implemented real-time tracking modules using FastAPI and PostgreSQL.
 
-**Junior Backend Developer**
-XYZ Solutions | Jan 2022 – May 2023
+Reduced API latency by 75% (from 400ms to 100ms) through advanced indexing and Redis caching.
 
-* Developed backend modules for e-commerce platform.
-* Maintained and optimized PostgreSQL database queries.
-* Implemented authentication and authorization using JWT.
-* Fixed bugs and improved system stability.
+Mentored a team of 5 developers and enforced Clean Architecture principles.
 
----
+Technologies used: Python, FastAPI, PostgreSQL, Redis, Docker, AWS.
 
-### **PROJECTS**
+Backend Developer | FPT Software | Jan 2019 – May 2022
 
-**E-Commerce Backend System**
+Contributed to a digital transformation project for a major US-based bank.
 
-* Built scalable backend using ASP.NET Core and PostgreSQL.
-* Implemented product, order, and user management modules.
-* Integrated payment gateway and real-time notifications.
+Designed and maintained microservices using Spring Boot.
 
-**Real-Time Chat Application**
+Identified and resolved critical concurrency issues in the core banking module.
 
-* Developed backend using WebSocket and Node.js.
-* Designed message queue system using Redis.
+Assisted in migrating legacy on-premise data to Azure Cloud.
 
----
+Technologies used: Java, Spring Boot, Oracle DB, Azure, Microservices, JUnit.
 
-### **EDUCATION**
+TECHNICAL PROJECTS
+EpicCV - AI-Driven Resume Analyzer
 
+Developed an end-to-end pipeline to extract and match CVs with JDs using LLMs.
+
+Utilized LangChain for prompt chaining and pgvector for semantic search.
+
+Built the backend with FastAPI and integrated Gemini Pro for information extraction.
+
+Real-time IoT Dashboard
+
+Created a monitoring system for industrial sensors using ASP.NET Core and SignalR.
+
+Optimized data ingestion pipeline to handle 10,000 signals per second.
+
+EDUCATION
+University of Science and Technology - UD (DUT)
 Bachelor of Information Technology
-University of Science and Technology
-Graduated: 2022
 
----
+GPA: 3.4/4.0
 
-### **CERTIFICATIONS**
+Graduation Year: 2019
 
-* Microsoft Certified: Azure Fundamentals
-* AWS Certified Cloud Practitioner
+CERTIFICATIONS & AWARDS
+AWS Certified Solutions Architect – Associate (2024)
 
----
+2nd Prize, Da Nang City Hackathon (2021)
 
-### **SOFT SKILLS**
+TOEIC: 880/990
 
-* Problem-solving
-* Team collaboration
-* Communication
-* Time management
+SOFT SKILLS
+Analytical Thinking & Problem Solving.
 
----
+Effective Team Collaboration (Scrum/Agile).
 
-### **LANGUAGES**
-
-* English: Intermediate (B2)
-* Vietnamese: Native
-
----
+Technical Leadership & Mentoring.

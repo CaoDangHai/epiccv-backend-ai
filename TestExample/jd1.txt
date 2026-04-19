@@ -1,81 +1,47 @@
-**JOB DESCRIPTION – MIDDLE BACKEND ENGINEER (PYTHON / FASTAPI)**
+JOB DESCRIPTION: SENIOR/MIDDLE BACKEND ENGINEER (AI-DRIVEN PRODUCT)
 
-**Company:** EpicCV AI
-**Location:** Remote / Hybrid
-**Employment Type:** Full-time
+Company: EpicCV AI - The Next Gen Recruitment Platform
+Location: Da Nang (Hybrid) / Singapore (Remote)
 
----
+1. THE MISSION
+We are building a massive-scale RAG (Retrieval-Augmented Generation) system to process millions of CVs. We don't just need a "coder"; we need a System Architect who understands how to optimize high-concurrency APIs and handle complex data structures in PostgreSQL.
 
-### **1. Overview**
+2. KEY RESPONSIBILITIES
 
-We are looking for a Middle Backend Engineer to join our engineering team and build scalable, high-performance backend systems for an AI-powered CV analysis platform. You will work closely with frontend developers, AI engineers, and product managers to deliver robust APIs and services.
+Architect and scale our core backend using FastAPI to handle 5,000+ concurrent users.
 
----
+Implement complex PostgreSQL schemas, specifically focusing on JSONB performance and pgvector for semantic search.
 
-### **2. Responsibilities**
+Building and maintaining robust ETL pipelines for CV data ingestion.
 
-* Design, develop, and maintain backend services using Python (FastAPI).
-* Build RESTful APIs for CV parsing, job matching, and AI-based recommendations.
-* Integrate third-party APIs (LLMs, authentication, storage services).
-* Optimize application performance, scalability, and reliability.
-* Work with databases (PostgreSQL) and design efficient schemas.
-* Implement authentication, authorization, and security best practices.
-* Write clean, maintainable, and testable code.
-* Collaborate with cross-functional teams in an Agile environment.
-* Debug and troubleshoot production issues.
+Ensuring system security with OAuth2/OpenID Connect and implementing data privacy standards (GDPR-ready).
 
----
+Collaborating with AI researchers to deploy LLM-based features (Prompt Engineering & Chaining).
 
-### **3. Requirements**
+3. MANDATORY REQUIREMENTS (Must-Have)
 
-* 2–4 years of experience in backend development.
-* Strong experience with Python and FastAPI (or similar frameworks like Django/Flask).
-* Solid understanding of RESTful API design.
-* Experience with relational databases (PostgreSQL, MySQL).
-* Familiarity with Docker and containerized environments.
-* Understanding of Git workflows and version control.
-* Basic knowledge of cloud services (AWS, GCP, or Azure).
-* Good problem-solving and debugging skills.
+Experience: At least 3 years in Backend Development. Proven experience with high-traffic systems is a huge plus.
 
----
+Tech Stack: Mastery of Python and its asynchronous ecosystem (FastAPI/Asyncio).
 
-### **4. Nice to Have**
+Database: Must be an expert in SQL optimization. If you don't know the difference between GIN and B-Tree indexes, please don't apply.
 
-* Experience with AI/ML integrations (OpenAI, LLM APIs).
-* Knowledge of message queues (RabbitMQ, Kafka).
-* Experience with microservices architecture.
-* Familiarity with CI/CD pipelines.
-* Experience with Elasticsearch or vector databases.
+Cloud & DevOps: Strong hands-on experience with AWS (Lambda, RDS, S3) and Kubernetes.
 
----
+Soft Skills: Ability to lead technical discussions and mentor Junior developers.
 
-### **5. Tech Stack**
+4. THE EXTRA MILE (Nice-to-Have)
 
-* **Backend:** Python, FastAPI
-* **Database:** PostgreSQL
-* **DevOps:** Docker, GitHub Actions
-* **Cloud:** AWS / GCP
-* **Others:** Redis, Celery
+Experience in building RAG Systems or working with LangChain/LlamaIndex.
 
----
+Knowledge of C# (.NET Core) for maintaining legacy microservices.
 
-### **6. Benefits**
+Background in Logistics or Recruitment Tech industries.
 
-* Competitive salary based on experience.
-* Opportunity to work on cutting-edge AI products.
-* Flexible working hours.
-* Remote-friendly environment.
-* Career growth and learning opportunities.
+Contributions to Open Source projects or technical blogs.
 
----
+5. WHY US?
 
-### **7. How to Apply**
+Salary: Up to $2,500 + Equity.
 
-Send your CV and portfolio to: **[hr@epiccv.ai](mailto:hr@epiccv.ai)**
-Subject: **[Backend Engineer Application] - Your Name**
-
----
-
-### **8. Notes**
-
-We value clean code, system thinking, and ownership. If you enjoy building scalable systems and working with AI-driven products, this role is for you.
+Direct impact on a product used by Global HR firms.
