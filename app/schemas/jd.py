@@ -67,7 +67,7 @@ class OverallAssessment(BaseModel):
 
 # --- MAIN MODEL ---
 
-class ComparisonAnalysisResponse(BaseModel):
+class JDResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     # Đưa các trường quan trọng lên đầu để Parser xử lý trước
@@ -86,3 +86,4 @@ class ComparisonAnalysisResponse(BaseModel):
     @classmethod
     def validate_main_lists(cls, v):
         return ensure_list(v)
+    

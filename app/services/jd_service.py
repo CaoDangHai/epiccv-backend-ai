@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from fastapi import HTTPException
 from pydantic import ValidationError
 from langchain_core.exceptions import OutputParserException
-from app.schemas.jd import JDResponse # Schema JD của chúng ta
+from app.schemas.jd import JDResponse 
 from app.core.llm import LLMFactory
 
 # Khởi tạo logger 
