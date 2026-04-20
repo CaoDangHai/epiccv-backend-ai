@@ -7,19 +7,121 @@ cv_extraction:
   context: |
     The input text is extracted from CVs (PDF/Docx) and may contain noise like page numbers, 
     headers, or inconsistent formatting. You must filter out the noise and focus on professional content.
+    Current Date: April 2026.
 
   instructions:
     - Language: Handle both English and Vietnamese text fluently.
     - Precision: Only extract information explicitly stated. Do not "hallucinate" or invent details.
     - Consistency: Standardize job titles and company names (e.g., "Google Inc" to "Google").
     - Missing Data: If a field is not found, return 'null' (for single values) or an empty list [] (for arrays).
+    - Default Values: For 'Skill', if level is missing, default to "Beginner". If years_of_experience is missing, default to 0.0.
+    - Level and years_of_experience: When a CV mentions a high-level skill (expert, advanced) but the total year_of_experience for that skill is significantly lower (<=2), prioritize displaying the skill level mentioned in the CV and increase the year_of_experience accordingly. However, add a warning item string to the Remark field that says "No proof of skill level ... found..." (Only applies to skills with years of experience).
 
   strict_rules:
-    links: "MUST be a flat List of Strings (e.g., ['https://github.com/hai', '...']). No objects allowed."
+    links: "MUST be a flat List of Strings in social_links.other. Specific fields (github, linkedin) must be strings or null."
     description: "In 'work_history' and 'projects', this MUST be a List of Strings. Each bullet point is one item."
     date_format: "Use 'YYYY-MM' (e.g., 2024-05) or 'Present'. Convert terms like 'nay', 'hiện tại', 'now' to 'Present'."
-    output_format: "Return ONLY the structured JSON data. No conversational filler, no markdown code blocks like ```json."
+    output_format: "Return ONLY the raw structured JSON data. No conversational filler, no markdown code blocks like ```json."
 
   edge_cases:
     - "If a candidate lists skills as a single long string separated by commas, split them into a List of Strings."
     - "If 'education' doesn't specify a degree, use 'High School' or 'Unknown' based on context."
+
+  few_shot_examples:
+    - example_1_narrative_skills:
+        input: |
+          "Technical skills: Java, Spring Boot. I am also good at Teamwork and using Git for version control. I've heard about Docker but never used it in a real project."
+        output: |
+          {
+            "skills": [
+              {"name": "Java", "level": "Beginner", "years_of_experience": 0.0, "category": "Language"},
+              {"name": "Spring Boot", "level": "Beginner", "years_of_experience": 0.0, "category": "Framework"},
+              {"name": "Git", "level": "Beginner", "years_of_experience": 0.0, "category": "Tool"},
+              {"name": "Teamwork", "level": "Beginner", "years_of_experience": 0.0, "category": "Soft Skill"},
+              {"name": "Docker", "level": "Beginner", "years_of_experience": 0.0, "category": "Tool"}
+            ],
+            "top_strengths": ["Backend Development", "Teamwork"]
+          }
+          Note : The years_of_experience must change depending on the work history and project experience provided in the CV. If the candidate has 2 years of experience working with projects / jobs that use Java, then the years_of_experience for Java should be the time duration the candidate has worked with this project / job instead of 0.0. The same applies to Spring Boot, Git, and Docker.
+
+    - example_2_date_logic:
+        input: |
+          "Experience: 
+          - AI Engineer at FPT Software (Jan 2025 - Present).
+          - Python Developer Intern at VNG (June 2024 - Dec 2024)."
+        output: |
+          {
+            "total_experience_years": 1.8,
+            "work_history": [
+              {
+                "company": "FPT Software",
+                "position": "AI Engineer",
+                "start_date": "2025-01",
+                "end_date": "Present",
+                "is_current": true,
+                "description": ["Working as AI Engineer"],
+                "skills_used": ["AI", "Python"]
+              },
+              {
+                "company": "VNG",
+                "position": "Python Developer Intern",
+                "start_date": "2024-06",
+                "end_date": "2024-12",
+                "is_current": false,
+                "description": ["Internship role in web development"],
+                "skills_used": ["Python"]
+              }
+            ]
+          }
+          Note : The work history in Python Developer Intern at VNG is 6 months, anh this job use Python , so the years_of_experience for Python must be added 0.5 years.
+          Note : The work history at position AI Engineer in company FPT Software continues with the use of skill Python from time 2025-01 to now. Therefore, calculate the total time spent in this position as: now - 2025-01, and add that duration to the years_of_experience for Python. ( now is the currrent date )
+          Note : Round the total years_of_experience to two decimal places. Apply the same logic to other skills mentioned in the work history and project experience.
+
+    - example_3_project_and_links:
+        input: |
+          "Project: SnapXpress. It is a logistics system. I used C#, .NET Core, and PostgreSQL. Check it at [github.com/haidang/snap](https://github.com/haidang/snap)."
+        output: |
+          {
+            "projects": [
+              {
+                "name": "SnapXpress",
+                "description": ["A logistics management system featuring a real-time tracking dashboard."],
+                "tech_stack": ["C#", ".NET Core", "PostgreSQL"],
+                "link": "[https://github.com/haidang/snap](https://github.com/haidang/snap)"
+              }
+            ],
+            "social_links": {
+              "linkedin": null,
+              "github": "[https://github.com/haidang/snap](https://github.com/haidang/snap)",
+              "portfolio": null,
+              "other": []
+            }
+          }
+
+    - example_4_minimalist_handling:
+        input: |
+          "I am Cao Dang Hai, a student at DUT. I won the Consolation Prize at the National Olympiad in Informatics 2024."
+        output: |
+          {
+            "full_name": "Cao Dang Hai",
+            "email": null,
+            "phone": null,
+            "education": [
+              {
+                "school": "University of Science and Technology - University of Da Nang (DUT)",
+                "degree": "Unknown",
+                "field_of_study": "Informatics",
+                "is_current": true
+              }
+            ],
+            "awards": [
+              {
+                "title": "Consolation Prize",
+                "issuer": "National Olympiad in Informatics",
+                "issue_date": "2024",
+                "description": "National level competition for informatics"
+              }
+            ],
+            "skills": [],
+            "total_experience_years": 0.0
+          }

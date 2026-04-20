@@ -16,6 +16,8 @@ class LLMFactory:
             instance = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=settings.GEMINI_KEY)
         elif model_name == "gemini-2.5-pro":
             instance = ChatGoogleGenerativeAI(model="gemini-2.5-pro", api_key=settings.GEMINI_KEY)
+        elif model_name == "gemini-2-flash":
+            instance = ChatGoogleGenerativeAI(model="gemini-2-flash", api_key=settings.GEMINI_KEY)
         else:
             raise ValueError(f"Model {model_name} không được hỗ trợ.")
 

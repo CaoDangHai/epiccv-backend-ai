@@ -116,6 +116,7 @@ class CVResponse(BaseModel):
     awards: List[Award] = []
     languages: List[Language] = []
     top_strengths: List[str] = []
+    remark: List[str] = [] # Cho những điểm vô lí 
 
     @field_validator(
         'skills', 'work_history', 'education', 'projects', 
