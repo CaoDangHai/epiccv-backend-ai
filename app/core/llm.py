@@ -20,7 +20,7 @@ class LLMFactory:
         "gemini-3-flash": {"temp": 0},
         "gemini-3.1-pro": {"temp": 0.3},
         "gemini-3.1-pro-preview": {"temp": 0},
-        "gemini-3.1-flash-lite-preview": {"temp": 0}, # dung dc
+        "gemini-3.1-flash-lite-preview": {"temp": 0},
     }
 
     @classmethod
