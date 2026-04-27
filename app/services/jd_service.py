@@ -17,7 +17,7 @@ class JdService:
     def __init__(self):
         # 1. Khởi tạo LLM 
        
-        self.llm = LLMFactory.get_model("gemini-2.5-flash") 
+        self.llm = LLMFactory.get_model("claude-haiku-4.5") 
         self.structured_llm = self.llm.with_structured_output(JDResponse)
 
         # 2. Load Prompt từ file YAML 

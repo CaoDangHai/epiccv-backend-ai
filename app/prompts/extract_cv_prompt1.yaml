@@ -6,7 +6,8 @@ cv_extraction:
 
   context: |
     The input text is extracted from CVs (PDF/Docx) and may contain noise like page numbers, 
-    headers, or inconsistent formatting. You must filter out the noise and focus on professional content.
+    headers, or inconsistent formatting. You must filter out the noise and focus on professional content. 
+    Filter out noise... but ensure critical identification like Full Name, Email, and Phone located at the top are preserved.
     Current Date: April 2026.
 
   instructions:
@@ -15,17 +16,23 @@ cv_extraction:
     - Consistency: Standardize job titles and company names (e.g., "Google Inc" to "Google").
     - Missing Data: If a field is not found, return 'null' (for single values) or an empty list [] (for arrays).
     - Default Values: For 'Skill', if level is missing, default to "Beginner". If years_of_experience is missing, default to 0.0.
-    - Level and years_of_experience: When a CV mentions a high-level skill (expert, advanced) but the total year_of_experience for that skill is significantly lower (<=2), prioritize displaying the skill level mentioned in the CV and increase the year_of_experience accordingly. However, add a warning item string to the Remark field that says "No proof of skill level ... found..." (Only applies to skills with years of experience).
-
-  strict_rules:
+    - Define skill levels:
+      - If the candidate has a total experience of > 5 years or holds roles such as 'Senior', 'Team Leader', 'Architect', default to a minimum of Advanced industry-related core skills (Core Skills) unless there is clear evidence to the contrary.
+      - If a candidate achieves an Expert/Advanced level in a highly applied or complex skill, they are automatically expected to achieve an equivalent or at least 'Advanced' level in the foundational skills that support it. ( e.g., if a candidate is 'Expert' in 'Machine Learning', they should be at least 'Advanced' in 'Python' and 'Data Analysis' unless there is clear evidence to the contrary.)
+    - Formatting: Return the JSON object directly. DO NOT wrap the response in markdown code blocks (```).
+    
+  strict_rules: 
     links: "MUST be a flat List of Strings in social_links.other. Specific fields (github, linkedin) must be strings or null."
     description: "In 'work_history' and 'projects', this MUST be a List of Strings. Each bullet point is one item."
     date_format: "Use 'YYYY-MM' (e.g., 2024-05) or 'Present'. Convert terms like 'nay', 'hiện tại', 'now' to 'Present'."
-    output_format: "Return ONLY the raw structured JSON data. No conversational filler, no markdown code blocks like ```json."
+    remark: |
+      "If a skill is 'Advanced' or 'Expert' but its calculated years_of_experience is <= 2, 
+      you MUST add a string: 'No proof of [Level] level for [Skill Name] found' to this list."
 
   edge_cases:
     - "If a candidate lists skills as a single long string separated by commas, split them into a List of Strings."
     - "If 'education' doesn't specify a degree, use 'High School' or 'Unknown' based on context."
+
 
   few_shot_examples:
     - example_1_narrative_skills:
@@ -44,7 +51,7 @@ cv_extraction:
           }
           Note : The years_of_experience must change depending on the work history and project experience provided in the CV. If the candidate has 2 years of experience working with projects / jobs that use Java, then the years_of_experience for Java should be the time duration the candidate has worked with this project / job instead of 0.0. The same applies to Spring Boot, Git, and Docker.
 
-    - example_2_date_logic:
+    - example_2_date_alogic:
         input: |
           "Experience: 
           - AI Engineer at FPT Software (Jan 2025 - Present).
