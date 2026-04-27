@@ -22,12 +22,13 @@ cv_extraction:
     - Formatting: Return the JSON object directly. DO NOT wrap the response in markdown code blocks (```).
     
   strict_rules: 
-    links: "MUST be a flat List of Strings in social_links.other. Specific fields (github, linkedin) must be strings or null."
-    description: "In 'work_history' and 'projects', this MUST be a List of Strings. Each bullet point is one item."
-    date_format: "Use 'YYYY-MM' (e.g., 2024-05) or 'Present'. Convert terms like 'nay', 'hiện tại', 'now' to 'Present'."
+    skill_calculation: |
+      "For each skill, you MUST calculate years_of_experience based ONLY on the specific duration of 
+      work_history or projects where that skill was explicitly mentioned. 
+      DO NOT simply assign 'total_experience_years' to individual skills."
     remark: |
       "If a skill is 'Advanced' or 'Expert' but its calculated years_of_experience is <= 2.0, 
-      you MUST add a string: 'No proof of [Level] level for [Skill Name] found' to this list."
+      you MUST add: 'No proof of [Level] level for [Skill Name] found' to the 'remark' list of THAT skill."
 
   edge_cases:
     - "If a candidate lists skills as a single long string separated by commas, split them into a List of Strings."
