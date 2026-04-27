@@ -18,7 +18,7 @@ load_dotenv() # đọc file .env vào hệ thống
 class CvService:
     def __init__(self):
         # 1. Khởi tạo LLM
-        self.llm = LLMFactory.get_model("claude-haiku-4.5") #
+        self.llm = LLMFactory.get_model("gemini-2.5-flash-lite") #
         self.structured_llm = self.llm.with_structured_output(CVResponse)
     
         # 2. Tách Prompt: Load từ file YAML

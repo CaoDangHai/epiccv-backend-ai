@@ -20,7 +20,7 @@ class AnalysisService:
     def __init__(self):
         # 1. Initialize LLM with Structured Output
         
-        self.llm = LLMFactory.get_model("gemini-3.1-pro-preview") 
+        self.llm = LLMFactory.get_model("gemini-2.5-flash-lite") 
         self.structured_llm = self.llm.with_structured_output(ComparisonAnalysisResponse)
 
         # 2. Load the System Prompt from YAML

@@ -15,7 +15,10 @@ class LLMFactory:
 
     # Cấu hình danh sách các model dùng trực tiếp Google AI Studio
     GOOGLE_MODELS = {
-        "gemini-2.5-flash": {},
+        "gemini-2.5-flash-lite" : {"temp": 0},
+        "gemini-2-flash": {"temp": 0},
+        "gemini-3-flash": {"temp": 0},
+        "gemini-3.1-pro": {"temp": 0.3},
     }
 
     @classmethod
@@ -42,8 +45,7 @@ class LLMFactory:
         elif model_name in cls.GOOGLE_MODELS:
             instance = ChatGoogleGenerativeAI(
                 model=model_name,
-                api_key=settings.GEMINI_KEY,
-                
+                api_key=settings.GOOGLE_KEY,
                 temperature=0 # Thường để 0 cho các tác vụ trích xuất CV
                 
             )
