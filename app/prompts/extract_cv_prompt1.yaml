@@ -18,7 +18,7 @@ cv_extraction:
     - Default Values: For 'Skill', if level is missing, default to "Beginner". If years_of_experience is missing, default to 0.0.
     - Define skill levels:
       - If the candidate has a total experience of > 5 years or holds roles such as 'Senior', 'Team Leader', 'Architect', default to a minimum of Advanced industry-related core skills (Core Skills) unless there is clear evidence to the contrary.
-      - If a candidate achieves an Expert/Advanced level in a highly applied or complex skill, they are automatically expected to achieve an equivalent or at least 'Advanced' level in the foundational skills that support it. ( e.g., if a candidate is 'Expert' in 'Machine Learning', they should be at least 'Advanced' in 'Python' and 'Data Analysis' unless there is clear evidence to the contrary.)
+      - If a candidate achieves an Expert/Advanced level in a highly applied or complex skill, they are automatically expected to achieve an equivalent or at least 'Advanced' level in the foundational skills that support it. (e.g., if a candidate is 'Expert' in 'Machine Learning', they should be at least 'Advanced' in 'Python' and 'Data Analysis' unless there is clear evidence to the contrary.)
     - Formatting: Return the JSON object directly. DO NOT wrap the response in markdown code blocks (```).
     
   strict_rules: 
@@ -26,13 +26,12 @@ cv_extraction:
     description: "In 'work_history' and 'projects', this MUST be a List of Strings. Each bullet point is one item."
     date_format: "Use 'YYYY-MM' (e.g., 2024-05) or 'Present'. Convert terms like 'nay', 'hiện tại', 'now' to 'Present'."
     remark: |
-      "If a skill is 'Advanced' or 'Expert' but its calculated years_of_experience is <= 2, 
+      "If a skill is 'Advanced' or 'Expert' but its calculated years_of_experience is <= 2.0, 
       you MUST add a string: 'No proof of [Level] level for [Skill Name] found' to this list."
 
   edge_cases:
     - "If a candidate lists skills as a single long string separated by commas, split them into a List of Strings."
     - "If 'education' doesn't specify a degree, use 'High School' or 'Unknown' based on context."
-
 
   few_shot_examples:
     - example_1_narrative_skills:
@@ -41,15 +40,14 @@ cv_extraction:
         output: |
           {
             "skills": [
-              {"name": "Java", "level": "Beginner", "years_of_experience": 0.0, "category": "Language"},
-              {"name": "Spring Boot", "level": "Beginner", "years_of_experience": 0.0, "category": "Framework"},
-              {"name": "Git", "level": "Beginner", "years_of_experience": 0.0, "category": "Tool"},
-              {"name": "Teamwork", "level": "Beginner", "years_of_experience": 0.0, "category": "Soft Skill"},
-              {"name": "Docker", "level": "Beginner", "years_of_experience": 0.0, "category": "Tool"}
+              {"name": "Java", "level": "Beginner", "years_of_experience": 0.0, "category": "Language", "remark": []},
+              {"name": "Spring Boot", "level": "Beginner", "years_of_experience": 0.0, "category": "Framework", "remark": []},
+              {"name": "Git", "level": "Beginner", "years_of_experience": 0.0, "category": "Tool", "remark": []},
+              {"name": "Teamwork", "level": "Beginner", "years_of_experience": 0.0, "category": "Soft Skill", "remark": []},
+              {"name": "Docker", "level": "Beginner", "years_of_experience": 0.0, "category": "Tool", "remark": []}
             ],
             "top_strengths": ["Backend Development", "Teamwork"]
           }
-          Note : The years_of_experience must change depending on the work history and project experience provided in the CV. If the candidate has 2 years of experience working with projects / jobs that use Java, then the years_of_experience for Java should be the time duration the candidate has worked with this project / job instead of 0.0. The same applies to Spring Boot, Git, and Docker.
 
     - example_2_date_alogic:
         input: |
@@ -80,13 +78,11 @@ cv_extraction:
               }
             ]
           }
-          Note : The work history in Python Developer Intern at VNG is 6 months, anh this job use Python , so the years_of_experience for Python must be added 0.5 years.
-          Note : The work history at position AI Engineer in company FPT Software continues with the use of skill Python from time 2025-01 to now. Therefore, calculate the total time spent in this position as: now - 2025-01, and add that duration to the years_of_experience for Python. ( now is the currrent date )
-          Note : Round the total years_of_experience to two decimal places. Apply the same logic to other skills mentioned in the work history and project experience.
+          Note: Current date is April 2026. From 2025-01 to Present (2026-04) is 1.3 years. From 2024-06 to 2024-12 is 0.5 years. Total for Python is 1.8 years.
 
     - example_3_project_and_links:
         input: |
-          "Project: SnapXpress. It is a logistics system. I used C#, .NET Core, and PostgreSQL. Check it at [github.com/haidang/snap](https://github.com/haidang/snap)."
+          "Project: SnapXpress. It is a logistics system using C#, .NET Core, and PostgreSQL. Check it at [github.com/haidang/snap](https://github.com/haidang/snap)."
         output: |
           {
             "projects": [
@@ -111,12 +107,10 @@ cv_extraction:
         output: |
           {
             "full_name": "Cao Dang Hai",
-            "email": null,
-            "phone": null,
             "education": [
               {
-                "school": "University of Science and Technology - University of Da Nang (DUT)",
-                "degree": "Unknown",
+                "school": "DUT",
+                "degree": "Bachelor (In Progress)",
                 "field_of_study": "Informatics",
                 "is_current": true
               }
@@ -125,10 +119,36 @@ cv_extraction:
               {
                 "title": "Consolation Prize",
                 "issuer": "National Olympiad in Informatics",
-                "issue_date": "2024",
-                "description": "National level competition for informatics"
+                "issue_date": "2024"
               }
             ],
             "skills": [],
             "total_experience_years": 0.0
           }
+
+    - example_5_level_experience_mismatch:
+        input: |
+          "I am a Senior Frontend Developer with Expert skills in Next.js and Tailwind CSS. 
+          Experience:
+          - Frontend Engineer at TechHub (March 2025 - Present)."
+        output: |
+          {
+            "total_experience_years": 1.1,
+            "skills": [
+              {
+                "name": "Next.js",
+                "level": "Expert",
+                "years_of_experience": 1.1,
+                "category": "Framework",
+                "remark": ["No proof of Expert level for Next.js found"]
+              },
+              {
+                "name": "Tailwind CSS",
+                "level": "Expert",
+                "years_of_experience": 1.1,
+                "category": "Tool",
+                "remark": ["No proof of Expert level for Tailwind CSS found"]
+              }
+            ]
+          }
+          Note: From 2025-03 to 2026-04 (Current Date) is 1.1 years. Since 1.1 <= 2.0, the remark rule is triggered for Expert/Advanced levels.
