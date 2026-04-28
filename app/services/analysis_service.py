@@ -20,8 +20,8 @@ class AnalysisService:
     def __init__(self):
         # 1. Initialize LLM with Structured Output
         
-        self.llm = LLMFactory.get_model("gemini-2.5-flash-lite") 
-        self.structured_llm = self.llm.with_structured_output(ComparisonAnalysisResponse)
+        self.llm = LLMFactory.get_model("gpt-4.1-mini") #
+        self.structured_llm = self.llm.with_structured_output(ComparisonAnalysisResponse, method="function_calling")
 
         # 2. Load the System Prompt from YAML
         self.system_message = self._load_system_prompt()

@@ -5,7 +5,7 @@ Location: Da Nang, Vietnam
 GitHub: github.com/longdev92 | LinkedIn: linkedin.com/in/longdev92
 
 PROFESSIONAL SUMMARY
-Result-oriented Backend Engineer with over 5 years of experience in designing and scaling high-performance server-side applications. Expert in Python (FastAPI) and C# (.NET Core). Deeply interested in AI integration, Retrieval-Augmented Generation (RAG), and vector databases. Proven track record of optimizing database performance and leading small agile teams.
+Result-oriented Backend Engineer with over 5 years of experience in designing and scaling high-performance server-side applications. Expert in Python (FastAPI), and C# (.NET Core) . Deeply interested in AI integration, Retrieval-Augmented Generation (RAG), and vector databases. Proven track record of optimizing database performance and leading small agile teams.
 
 CORE COMPETENCIES
 Languages: C#, Python, Java, JavaScript (TypeScript), SQL.

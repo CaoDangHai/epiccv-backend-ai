@@ -943,6 +943,30 @@ files = [
 all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2)"]
 
 [[package]]
+name = "inflect"
+version = "7.5.0"
+description = "Correctly generate plurals, singular nouns, ordinals, indefinite articles"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "inflect-7.5.0-py3-none-any.whl", hash = "sha256:2aea70e5e70c35d8350b8097396ec155ffd68def678c7ff97f51aa69c1d92344"},
+    {file = "inflect-7.5.0.tar.gz", hash = "sha256:faf19801c3742ed5a05a8ce388e0d8fe1a07f8d095c82201eb904f5d27ad571f"},
+]
+
+[package.dependencies]
+more_itertools = ">=8.5.0"
+typeguard = ">=4.0.1"
+
+[package.extras]
+check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1) ; sys_platform != \"cygwin\""]
+cover = ["pytest-cov"]
+doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
+enabler = ["pytest-enabler (>=2.2)"]
+test = ["pygments", "pytest (>=6,!=8.1.*)"]
+type = ["pytest-mypy"]
+
+[[package]]
 name = "jiter"
 version = "0.14.0"
 description = "Fast iterable JSON parser."
@@ -1341,6 +1365,18 @@ numpy = [
 
 [package.extras]
 dev = ["absl-py", "pyink", "pylint (>=2.6.0)", "pytest", "pytest-xdist"]
+
+[[package]]
+name = "more-itertools"
+version = "11.0.2"
+description = "More routines for operating on iterables, beyond itertools"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "more_itertools-11.0.2-py3-none-any.whl", hash = "sha256:6e35b35f818b01f691643c6c611bc0902f2e92b46c18fffa77ae1e7c46e912e4"},
+    {file = "more_itertools-11.0.2.tar.gz", hash = "sha256:392a9e1e362cbc106a2457d37cabf9b36e5e12efd4ebff1654630e76597df804"},
+]
 
 [[package]]
 name = "namex"
@@ -2387,6 +2423,26 @@ files = [
 ]
 
 [[package]]
+name = "sqlacodegen-v2"
+version = "0.1.4"
+description = "Automatic model code generator for SQLAlchemy 2.0"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "sqlacodegen_v2-0.1.4-py3-none-any.whl", hash = "sha256:de6bbd548a8cee221fa8870f0710c9154f0d82e388ba4f092d294fd06eed47ed"},
+    {file = "sqlacodegen_v2-0.1.4.tar.gz", hash = "sha256:11dca99a23634bc7c3a8b3f8a491203f670810fc8250448ef6ef6a6b5a3bacc1"},
+]
+
+[package.dependencies]
+inflect = ">=4.0.0"
+SQLAlchemy = ">=2.0"
+
+[package.extras]
+citext = ["sqlalchemy-citext (>=1.7.0)"]
+test = ["mysql-connector-python", "psycopg2-binary", "pytest", "pytest-cov", "sqlmodel"]
+
+[[package]]
 name = "sqlalchemy"
 version = "2.0.49"
 description = "Database Abstraction Library"
@@ -2685,6 +2741,21 @@ discord = ["requests"]
 notebook = ["ipywidgets (>=6)"]
 slack = ["slack-sdk"]
 telegram = ["requests"]
+
+[[package]]
+name = "typeguard"
+version = "4.5.1"
+description = "Run-time type checker for Python"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "typeguard-4.5.1-py3-none-any.whl", hash = "sha256:44d2bf329d49a244110a090b55f5f91aa82d9a9834ebfd30bcc73651e4a8cc40"},
+    {file = "typeguard-4.5.1.tar.gz", hash = "sha256:f6f8ecbbc819c9bc749983cc67c02391e16a9b43b8b27f15dc70ed7c4a007274"},
+]
+
+[package.dependencies]
+typing_extensions = ">=4.14.0"
 
 [[package]]
 name = "typing-extensions"
@@ -3433,4 +3504,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0"
-content-hash = "01486a7b9a69ba61182d4cfb61a4c97ac64033127df316b9d89348207bd70490"
+content-hash = "eeeeebe74049df504f86c16a10543074bb364c5fc605a69ddba1daa83dd7563d"

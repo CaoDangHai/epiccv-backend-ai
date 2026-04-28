@@ -1,8 +1,9 @@
-from pydantic import AliasChoices, BaseModel, Field, field_validator
+from pydantic import AliasChoices, BaseModel, Field, field_validator, ConfigDict
 from typing import List, Optional, Union, Any
 from .shared import ensure_list, SkillLevel
 
 class SocialLinks(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     linkedin: Optional[str] = None
     github: Optional[str] = None
     portfolio: Optional[str] = None
@@ -14,16 +15,21 @@ class SocialLinks(BaseModel):
         return ensure_list(v)
 
 class Skill(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     name: Optional[str] = "Unknown"
     level: Union[SkillLevel, str] = SkillLevel.BEGINNER 
     years_of_experience: Optional[float] = Field(0.0, ge=0)
     category: Optional[str] = "Technical"
+    # Nâng cấp: Thêm remark vào từng skill để AI ghi chú logic cụ thể
+    remark: List[str] = [] 
 
 class Language(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     name: str = Field(..., validation_alias=AliasChoices('name', 'language'))
     proficiency: Optional[str] = "Intermediate"
 
 class Experience(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     company: Optional[str] = "Unknown"
     position: Optional[str] = "Unknown"
     location: Optional[str] = None
@@ -39,6 +45,7 @@ class Experience(BaseModel):
         return ensure_list(v)
 
 class Education(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     school: Optional[str] = "Unknown"
     degree: Optional[str] = "Unknown"
     field_of_study: Optional[str] = None
@@ -48,6 +55,7 @@ class Education(BaseModel):
     gpa: Optional[Union[float, str]] = None
 
 class Certification(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     name: Optional[str] = "Unknown"
     issuer: Optional[str] = None
     issue_date: Optional[str] = None
@@ -55,12 +63,14 @@ class Certification(BaseModel):
     credential_url: Optional[str] = None
 
 class Award(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     title: str
     issuer: Optional[str] = None
     issue_date: Optional[str] = None
     description: Optional[str] = None
 
 class Project(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     name: Optional[str] = "Unknown"
     description: List[str] = [] 
     tech_stack: List[str] = []
@@ -72,10 +82,12 @@ class Project(BaseModel):
         return ensure_list(v)
 
 class CVResponse(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     full_name: Optional[str] = "Unknown"
     email: Optional[str] = None 
     phone: Optional[str] = None
-    address: Optional[str] = None
+    # Nâng cấp: Chấp nhận cả 'address' và 'location' từ AI
+    address: Optional[str] = Field(None, validation_alias=AliasChoices('address', 'location'))
     age: Optional[Union[int, str]] = None 
     social_links: Optional[SocialLinks] = Field(default_factory=SocialLinks)
     summary: Optional[str] = None
@@ -94,8 +106,24 @@ class CVResponse(BaseModel):
     @classmethod
     def validate_main_lists(cls, v):
         return ensure_list(v)
+    
+    def to_filtered(self) -> 'FilteredCVResponse':
+        """Chuyển đổi chính instance này sang FilteredCVResponse"""
+        return FilteredCVResponse(
+        summary=self.summary,
+        total_experience_years=self.total_experience_years,
+        top_strengths=self.top_strengths,
+        skills=self.skills,
+        work_history=self.work_history,
+        education=self.education,
+        projects=self.projects,
+        certifications=self.certifications,
+        awards=self.awards,
+        languages=self.languages
+        )
 
 class FilteredCVResponse(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     summary: Optional[str] = None
     total_experience_years: float = 0.0
     top_strengths: List[str] = []
@@ -111,10 +139,3 @@ class FilteredCVResponse(BaseModel):
     @classmethod
     def validate_main_lists(cls, v):
         return ensure_list(v)
-    
-    @classmethod
-    def from_full_cv(cls, full_cv: CVResponse) -> "FilteredCVResponse":
-        full_data = full_cv.model_dump()
-        qualified_keys = {"summary", "total_experience_years", "top_strengths", "skills", "work_history", "education", "projects", "certifications", "awards", "languages"}
-        filtered_data = {k: v for k, v in full_data.items() if k in qualified_keys}
-        return cls(**filtered_data)

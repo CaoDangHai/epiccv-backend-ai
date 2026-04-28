@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Body, UploadFile, File, HTTPException
 # Import trực tiếp instance đã tạo sẵn từ file service
 from app.schemas.result import ComparisonAnalysisResponse
+from app.schemas.roadmap import LearningRoadmapResponse
+from app.services import roadmap_service
 from app.services.analysis_service import analysis_service
 from app.services.cv_service import cv_service 
 from app.services.jd_service import jd_service
@@ -31,6 +33,13 @@ async def extract_cv(file: UploadFile = File(...)):
 
         
         cv_data = await cv_service.extract_cv_data(text)
+
+        if cv_data is None:
+            # Nếu service trả về None, phải báo lỗi ngay
+            raise HTTPException(
+                status_code=500,
+                detail="LLM không trả về kết quả hợp lệ."
+            )
 
         return cv_data
 
@@ -71,15 +80,24 @@ async def extract_jd(file: UploadFile = File(None), jd_text: str = None):
         logger.error(f"Lỗi tại Endpoint JD: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Lỗi xử lý trích xuất JD: {str(e)}")
     
-@router.post("/analyze", response_model=ComparisonAnalysisResponse)
-async def analyze_cv_jd(cv_data: FilteredCVResponse, jd_data: JDResponse):
+@router.post("/compare", response_model=ComparisonAnalysisResponse)
+async def compare_cv_jd(cv_data: FilteredCVResponse, jd_data: JDResponse):
     try:
         result = await analysis_service.compare_cv_with_jd(cv_data, jd_data)
         return result
     except Exception as e:
-        logger.error(f"Lỗi tại Endpoint Analyze: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Lỗi xử lý phân tích: {str(e)}"    )
+        logger.error(f"Lỗi tại Endpoint Compare: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Lỗi xử lý so sánh: {str(e)}"    )
     
+
+@router.post("/generate-roadmap",response_model= LearningRoadmapResponse)
+async def generate_roadmap(cv_data: FilteredCVResponse, jd_data: JDResponse):
+    try:
+        roadmap = await roadmap_service.generate_roadmap(cv_data, jd_data)
+        return roadmap
+    except Exception as e:
+        logger.error(f"Lỗi tại Endpoint Generate Roadmap: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Lỗi xử lý tạo lộ trình: {str(e)}")
 
 @router.post("/full-pipeline")
 async def full_analysis_pipeline(cv_file: UploadFile = File(...), jd_file: UploadFile = File(...)):
@@ -89,8 +107,8 @@ async def full_analysis_pipeline(cv_file: UploadFile = File(...), jd_file: Uploa
     full_cv = await cv_service.extract_cv_data(raw_cv_text) # Trả về CVResponse
 
     # Bước 2: Biến đổi thành Filtered CV (Lọc PII)
-    # Sử dụng đúng cái factory method ông đã viết trong schema
-    filtered_cv = FilteredCVResponse.from_full_cv(full_cv) 
+
+    filtered_cv = full_cv.to_filtered() # Trả về FilteredCVResponse, đã lọc PII và chỉ giữ lại phần cần thiết cho phân tích và tạo roadmap
 
     # Bước 3: Trích xuất JD
     jd_content = await jd_file.read()

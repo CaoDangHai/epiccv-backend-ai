@@ -6,150 +6,106 @@ cv_extraction:
 
   context: |
     The input text is extracted from CVs (PDF/Docx) and may contain noise like page numbers, 
-    headers, or inconsistent formatting. You must filter out the noise and focus on professional content. 
-    Filter out noise... but ensure critical identification like Full Name, Email, and Phone located at the top are preserved.
+    headers, or inconsistent formatting. Filter out noise but focus on professional content. 
+    Ensure critical identification like Full Name, Email, and Phone are preserved.
     Current Date: April 2026.
 
+  logic_priority:
+  - STEP_1_CLEAN: Filter noise, identify professional blocks (Summary, Experience, Projects).
+  - STEP_2_MATRIX_SCAN: Identify all technologies and map them to their base Languages/Stacks using the 'Implicit Tech Matrix'.
+  - STEP_3_CHRONO_MAPPING: Create a timeline for each technology. If 'React' is in Job A, then 'JavaScript' and 'Frontend' also exist in Job A's timeline.
+  - STEP_4_TOTAL_MATH: Sum ALL non-overlapping durations. F
+  - STEP_5_SCHEMA_VALIDATION: Ensure 'social_links' nesting and field naming ('address', 'name') match the Pydantic schema exactly.
+  - STEP_6_REMARK_AUDIT: Perform a final 'Proof vs Level' check for every skill to trigger mandatory remarks.
+
   instructions:
-    - Language: Handle both English and Vietnamese text fluently.
-    - Precision: Only extract information explicitly stated. Do not "hallucinate" or invent details.
-    - Consistency: Standardize job titles and company names (e.g., "Google Inc" to "Google").
-    - Missing Data: If a field is not found, return 'null' (for single values) or an empty list [] (for arrays).
-    - Default Values: For 'Skill', if level is missing, default to "Beginner". If years_of_experience is missing, default to 0.0.
-    - Define skill levels:
-      - If the candidate has a total experience of > 5 years or holds roles such as 'Senior', 'Team Leader', 'Architect', default to a minimum of Advanced industry-related core skills (Core Skills) unless there is clear evidence to the contrary.
-      - If a candidate achieves an Expert/Advanced level in a highly applied or complex skill, they are automatically expected to achieve an equivalent or at least 'Advanced' level in the foundational skills that support it. (e.g., if a candidate is 'Expert' in 'Machine Learning', they should be at least 'Advanced' in 'Python' and 'Data Analysis' unless there is clear evidence to the contrary.)
-    - Formatting: Return the JSON object directly. DO NOT wrap the response in markdown code blocks (```).
-    
+    - "Language: Handle both English and Vietnamese text fluently."
+    - "Precision: Only extract information explicitly stated. Do not hallucinate or invent details."
+    - "Consistency: Standardize job titles and company names."
+    - "Missing Data: If a field is not found, return 'null' (single values) or [] (arrays)."
+    - "Formatting: Return the JSON object directly. DO NOT wrap in markdown code blocks."
+    - Remark_Rule: |
+        IF (level == 'Advanced' OR 'Expert') AND (years_of_experience <= 2.0)
+        THEN you MUST add exactly: "No proof of [Level] level for [Skill Name] found" to the 'remark' list of THAT skill.
+
   strict_rules: 
-    skill_calculation: |
-      "For each skill, you MUST calculate years_of_experience based ONLY on the specific duration of 
-      work_history or projects where that skill was explicitly mentioned. 
-      DO NOT simply assign 'total_experience_years' to individual skills."
-    remark: |
-      "If a skill is 'Advanced' or 'Expert' but its calculated years_of_experience is <= 2.0, 
-      you MUST add: 'No proof of [Level] level for [Skill Name] found' to the 'remark' list of THAT skill."
+    # QUY TẮC 1: LIÊN ĐỚI CÔNG NGHỆ (Implicit Skills)
+    implicit_skill_verification: |
+      "Recognize professional tech-stacks and their implicit languages:
+      - '.NET', 'ASP.NET', 'EF Core' -> Implicitly verifies 'C#'.
+      - 'Spring Boot', 'Hibernate', 'JUnit' -> Implicitly verifies 'Java'.
+      - 'FastAPI', 'Django', 'Flask' -> Implicitly verifies 'Python'.
+      If a stack is listed in a job, you MUST consider the underlying language verified for that specific duration."
+    # 1. ÉP CẤU TRÚC LỒNG NHAU (Fix lỗi 422 cho github/linkedin)
+    nesting_enforcement: |
+      "CRITICAL: 'github', 'linkedin', and 'portfolio' MUST be placed INSIDE the 'social_links' object. 
+      DO NOT put them at the root of the JSON. If they are at the root, the system will crash."
+
+    # 2. ÉP TÊN TRƯỜNG CHUẨN (Chống lỗi 'location' và 'title')
+    field_naming_enforcement: |
+      "ALWAYS use 'address' (not 'location') in CVResponse. 
+      ALWAYS use 'name' (not 'title') in Certification."
+
+    # 3. KIỂM TOÁN TỔNG NĂM KINH NGHIỆM (Chặn lỗi 3.8 năm)
+    total_experience_audit: |
+      "Calculation Task: Sum ALL job durations. 
+      (FPT Software: Jan 2019 - May 2022 = 3.4 years) + (TechVina: June 2022 - April 2026 = 3.8 years). 
+      The 'total_experience_years' MUST be 7.2. Do not just return 3.8."
+
+    # 4. ĐỐI CHIẾU BẰNG CHỨNG KỸ NĂNG (Chặn lỗi C# 3.8 năm)
+    skill_evidence_mapping: |
+      "Check each skill against 'Work Experience'. 
+      If a skill (like C#) is only in Summary but not used in any job, years_of_experience MUST be 0.0. 
+      If Level >= Advanced and Years <= 2.0, you MUST add the remark."
+      
+     
+  
 
   edge_cases:
     - "If a candidate lists skills as a single long string separated by commas, split them into a List of Strings."
     - "If 'education' doesn't specify a degree, use 'High School' or 'Unknown' based on context."
 
   few_shot_examples:
-    - example_1_narrative_skills:
+    - example_1_skill_audit:
         input: |
-          "Technical skills: Java, Spring Boot. I am also good at Teamwork and using Git for version control. I've heard about Docker but never used it in a real project."
+          "Henry Nguyen. Expert in C#. Experience: Data Analyst (June 2022 – Present)."
         output: |
           {
+            "full_name": "Henry Nguyen",
+            "total_experience_years": 3.8,
             "skills": [
-              {"name": "Java", "level": "Beginner", "years_of_experience": 0.0, "category": "Language", "remark": []},
-              {"name": "Spring Boot", "level": "Beginner", "years_of_experience": 0.0, "category": "Framework", "remark": []},
-              {"name": "Git", "level": "Beginner", "years_of_experience": 0.0, "category": "Tool", "remark": []},
-              {"name": "Teamwork", "level": "Beginner", "years_of_experience": 0.0, "category": "Soft Skill", "remark": []},
-              {"name": "Docker", "level": "Beginner", "years_of_experience": 0.0, "category": "Tool", "remark": []}
-            ],
-            "top_strengths": ["Backend Development", "Teamwork"]
+              {
+                "name": "C#",
+                "level": "Expert",
+                "years_of_experience": 0.0,
+                "category": "Language",
+                "remark": ["No proof of Expert level for C# found"]
+              },
+              {
+                "name": "Python",
+                "level": "Advanced",
+                "years_of_experience": 3.8,
+                "category": "Language",
+                "remark": []
+              }
+            ]
           }
 
-    - example_2_date_alogic:
+    - example_2_date_math:
         input: |
           "Experience: 
-          - AI Engineer at FPT Software (Jan 2025 - Present).
-          - Python Developer Intern at VNG (June 2024 - Dec 2024)."
+          - AI Engineer at FPT (Jan 2025 - Present).
+          - Intern at VNG (June 2024 - Dec 2024)."
         output: |
           {
             "total_experience_years": 1.8,
             "work_history": [
               {
-                "company": "FPT Software",
+                "company": "FPT",
                 "position": "AI Engineer",
                 "start_date": "2025-01",
                 "end_date": "Present",
-                "is_current": true,
-                "description": ["Working as AI Engineer"],
-                "skills_used": ["AI", "Python"]
-              },
-              {
-                "company": "VNG",
-                "position": "Python Developer Intern",
-                "start_date": "2024-06",
-                "end_date": "2024-12",
-                "is_current": false,
-                "description": ["Internship role in web development"],
-                "skills_used": ["Python"]
+                "skills_used": ["AI"]
               }
             ]
           }
-          Note: Current date is April 2026. From 2025-01 to Present (2026-04) is 1.3 years. From 2024-06 to 2024-12 is 0.5 years. Total for Python is 1.8 years.
-
-    - example_3_project_and_links:
-        input: |
-          "Project: SnapXpress. It is a logistics system using C#, .NET Core, and PostgreSQL. Check it at [github.com/haidang/snap](https://github.com/haidang/snap)."
-        output: |
-          {
-            "projects": [
-              {
-                "name": "SnapXpress",
-                "description": ["A logistics management system featuring a real-time tracking dashboard."],
-                "tech_stack": ["C#", ".NET Core", "PostgreSQL"],
-                "link": "[https://github.com/haidang/snap](https://github.com/haidang/snap)"
-              }
-            ],
-            "social_links": {
-              "linkedin": null,
-              "github": "[https://github.com/haidang/snap](https://github.com/haidang/snap)",
-              "portfolio": null,
-              "other": []
-            }
-          }
-
-    - example_4_minimalist_handling:
-        input: |
-          "I am Cao Dang Hai, a student at DUT. I won the Consolation Prize at the National Olympiad in Informatics 2024."
-        output: |
-          {
-            "full_name": "Cao Dang Hai",
-            "education": [
-              {
-                "school": "DUT",
-                "degree": "Bachelor (In Progress)",
-                "field_of_study": "Informatics",
-                "is_current": true
-              }
-            ],
-            "awards": [
-              {
-                "title": "Consolation Prize",
-                "issuer": "National Olympiad in Informatics",
-                "issue_date": "2024"
-              }
-            ],
-            "skills": [],
-            "total_experience_years": 0.0
-          }
-
-    - example_5_level_experience_mismatch:
-        input: |
-          "I am a Senior Frontend Developer with Expert skills in Next.js and Tailwind CSS. 
-          Experience:
-          - Frontend Engineer at TechHub (March 2025 - Present)."
-        output: |
-          {
-            "total_experience_years": 1.1,
-            "skills": [
-              {
-                "name": "Next.js",
-                "level": "Expert",
-                "years_of_experience": 1.1,
-                "category": "Framework",
-                "remark": ["No proof of Expert level for Next.js found"]
-              },
-              {
-                "name": "Tailwind CSS",
-                "level": "Expert",
-                "years_of_experience": 1.1,
-                "category": "Tool",
-                "remark": ["No proof of Expert level for Tailwind CSS found"]
-              }
-            ]
-          }
-          Note: From 2025-03 to 2026-04 (Current Date) is 1.1 years. Since 1.1 <= 2.0, the remark rule is triggered for Expert/Advanced levels.

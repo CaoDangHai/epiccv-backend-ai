@@ -27,7 +27,8 @@ analysis_logic:
       - "cv_evidence: Max 15 words; must be a direct quote or specific project name from CV."
       - "lists: Never return null; use empty array [] if no data."
       - "logic: Ensure missing_skills descriptions are detailed enough for a learning roadmap generator."
-      - "consistency: score (alias for match_percentage) must be 0-100 float."
+      - "mandatory_fields: Always calculate and include 'overall.match_percentage' and 'score' ."
+      - "consistency: score and overall.match_percentage must be identical and range from 0.0 to 100.0."
 
 
   output_format:
@@ -60,7 +61,7 @@ analysis_logic:
           gap_description: string
           recommendation: string
 
-  final_directive: "Perform internal CoT reasoning. Output ONLY the raw JSON object." 
+  final_directive: "Perform internal CoT reasoning. Ensure 'overall.match_percentage' is calculated and included. Output ONLY the raw JSON object."
 
   reasoning_process_cot:
   instruction: "Before generating JSON, perform the following internal reasoning steps:"

@@ -1,60 +1,76 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from app.core.config import settings
+import logging
+
+# Thiết lập log để dễ theo dõi khi gọi model
+logger = logging.getLogger(__name__)
 
 class LLMFactory:
+    """
+    Factory quản lý các instance LLM thông qua YesScale Proxy.
+    """
     _instances = {}
 
-    # Cấu hình danh sách các model dùng qua cổng Proxy (trollllm)
-    PROXY_MODELS = {
-        "claude-haiku-4.5": {"temp": 0},
-        "gemini-3.1-pro-preview": {"temp": 0},
-        "gpt-5.2": {"temp": 0.1},
+    # Danh sách các model phổ biến trên YesScale và cấu hình temperature mặc định
+    # Bạn có thể thêm/bớt model tùy theo gói đăng ký tại YesScale
+    YES_SCALE_MODELS = {
+        # OpenAI Models
+        "gpt-4o": {"temp": 0.2},
+        "gpt-4.1-mini" : {"temp": 0},
         "gpt-4o-mini": {"temp": 0},
-    }
-
-    # Cấu hình danh sách các model dùng trực tiếp Google AI Studio
-    GOOGLE_MODELS = {
-        "gemini-2.5-flash-lite" : {"temp": 0}, # dung dc
-        "gemini-2.5-flash": {"temp": 0}, # dung dc 
-        "gemini-3-flash": {"temp": 0},
-        "gemini-3.1-pro": {"temp": 0.3},
-        "gemini-3.1-pro-preview": {"temp": 0},
-        "gemini-3.1-flash-lite-preview": {"temp": 0},
+        "gpt-5-mini": {"temp": 0},
+        "gpt-5" : {"temp": 0},
+        
+        
+        # Google Gemini (Chạy qua proxy OpenAI của YesScale)
+        "gemini-3-flash": {"temp": 0.1},
+        "gemini-3-pro": {"temp": 0.2},
+        "gemini-3-flash-preview" : {"temp": 0},
+        
+        
+        
     }
 
     @classmethod
-    def get_model(cls, model_name: str):
-        # 1. Kiểm tra Singleton
-        if model_name in cls._instances:
-            return cls._instances[model_name]
+    def get_model(cls, model_name: str, temperature: float = None):
+        """
+        Lấy instance của model. 
+        :param model_name: Tên định danh của model (vd: 'gpt-4o')
+        :param temperature: Ghi đè temp mặc định nếu cần
+        """
+        
+        # Tạo cache key dựa trên model và temp để tránh conflict khi dùng cùng model nhưng khác temp
+        temp_to_use = temperature if temperature is not None else cls.YES_SCALE_MODELS.get(model_name, {}).get("temp", 0.2)
+        instance_key = f"{model_name}_{temp_to_use}"
 
-        instance = None
+        if instance_key in cls._instances:
+            return cls._instances[instance_key]
 
-        # 2. Khởi tạo cho các model qua cổng OpenAI Compatible (trollllm)
-        if model_name in cls.PROXY_MODELS:
-            config = cls.PROXY_MODELS[model_name]
+        # Kiểm tra xem model có trong danh sách hỗ trợ không (Gợi ý nếu gõ sai)
+        if model_name not in cls.YES_SCALE_MODELS:
+            logger.warning(f"Model {model_name} không nằm trong danh sách YES_SCALE_MODELS.")
+
+        try:
+            # Khởi tạo instance qua YesScale (Dùng chuẩn ChatOpenAI)
             instance = ChatOpenAI(
                 model=model_name,
-                api_key=settings.TROLLLM_KEY,
-                openai_api_base="https://chat.trollllm.xyz/v1",
-                temperature=config.get("temp", 0),
-                max_retries=2,
-                
+                api_key=settings.YES_SCALE_API_KEY,  
+                base_url=settings.YES_SCALE_BASE_URL, 
+                temperature=temp_to_use,
+                max_retries=3,
+                timeout=60, # Tăng timeout vì một số model như Claude/Gemini Pro phản hồi khá lâu
+          
             )
 
-        # 3. Khởi tạo cho các model Google chính chủ
-        elif model_name in cls.GOOGLE_MODELS:
-            instance = ChatGoogleGenerativeAI(
-                model=model_name,
-                api_key=settings.GOOGLE_KEY,
-                temperature=0 # Thường để 0 cho các tác vụ trích xuất CV
-                
-            )
+            # Lưu vào bộ nhớ đệm
+            cls._instances[instance_key] = instance
+            return instance
 
-        else:
-            raise ValueError(f"Model {model_name} chưa được cấu hình trong Factory.")
+        except Exception as e:
+            logger.error(f"Lỗi khi khởi tạo LLM {model_name}: {str(e)}")
+            raise RuntimeError(f"Không thể kết nối với YesScale cho model {model_name}.")
 
-        # Lưu vào bộ nhớ instance và trả về
-        cls._instances[model_name] = instance
-        return instance
+    @classmethod
+    def clear_cache(cls):
+        """Xóa toàn bộ instance đã lưu (Dùng khi cần refresh config)"""
+        cls._instances.clear()

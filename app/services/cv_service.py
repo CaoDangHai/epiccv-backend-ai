@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from fastapi import HTTPException
 from pydantic import ValidationError
 from langchain_core.exceptions import OutputParserException
-from app.schemas.cv import CVResponse
+from app.schemas.cv import CVResponse, FilteredCVResponse
 from app.core.llm import LLMFactory
 
 # Khởi tạo logger 
@@ -18,8 +18,8 @@ load_dotenv() # đọc file .env vào hệ thống
 class CvService:
     def __init__(self):
         # 1. Khởi tạo LLM
-        self.llm = LLMFactory.get_model("gemini-2.5-flash") #
-        self.structured_llm = self.llm.with_structured_output(CVResponse)
+        self.llm = LLMFactory.get_model("gpt-4o-mini") #
+        self.structured_llm = self.llm.with_structured_output(CVResponse, method="function_calling")
     
         # 2. Tách Prompt: Load từ file YAML
         self.system_message = self._load_system_prompt()
@@ -53,7 +53,7 @@ class CvService:
             return "You are an expert ATS data extraction AI. Extract CV precisely."
 
     async def extract_cv_data(self, raw_text: str) -> CVResponse:
-    
+        logger.info(f"Độ dài văn bản CV nhận được: {len(raw_text)} ký tự")
         try:
             result = await self.structured_llm.ainvoke([
                 ("system", self.system_message),
@@ -80,6 +80,12 @@ class CvService:
             if any(code in str(e) for code in ["401", "403", "invalid_api_key"]):
                 raise HTTPException(status_code=500, detail="Lỗi xác thực API Key!")
             raise HTTPException(status_code=500, detail="Hệ thống AI đang bận, vui lòng thử lại sau!")
+    def filter_cv_data(self, cv_data: CVResponse) -> FilteredCVResponse:
+        """Hàm phụ trợ để lọc dữ liệu CV trước khi so sánh với JD"""
+        qualified_keys = {"summary", "total_experience_years", "top_strengths", "skills", "work_history", "education", "projects", "certifications", "awards", "languages"}
+        filtered_data = {k: v for k, v in CVResponse.model_fields.items() if k in qualified_keys}
+        return FilteredCVResponse(**filtered_data)
+
         
 # Tạo instance
 cv_service = CvService()
