@@ -104,7 +104,7 @@ class CVResponse(BaseModel):
     languages: List[Language] = []
     top_strengths: List[str] = []
     remark: List[str] = [] 
-    model_config = ConfigDict(extra='ignore') # Nên để ignore để tránh sập app khi AI trả thừa data
+    model_config = ConfigDict(extra='ignore') #  ignore để tránh sập app khi AI trả thừa data
 
     @field_validator('skills', 'work_history', 'education', 'projects', 'certifications', 'awards', 'languages', 'top_strengths', 'remark', mode='before')
     @classmethod
