@@ -14,7 +14,7 @@ cv_extraction:
   - STEP_1_CLEAN: Filter noise, identify professional blocks (Summary, Experience, Projects).
   - STEP_2_MATRIX_SCAN: Identify all technologies and map them to their base Languages/Stacks using the 'Implicit Tech Matrix'.
   - STEP_3_CHRONO_MAPPING: Create a timeline for each technology. If 'React' is in Job A, then 'JavaScript' and 'Frontend' also exist in Job A's timeline.
-  - STEP_4_TOTAL_MATH: Sum ALL non-overlapping durations. F
+  - STEP_4_TOTAL_MATH: Sum ALL non-overlapping durations.
   - STEP_5_SCHEMA_VALIDATION: Ensure 'social_links' nesting and field naming ('address', 'name') match the Pydantic schema exactly.
   - STEP_6_REMARK_AUDIT: Perform a final 'Proof vs Level' check for every skill to trigger mandatory remarks.
 
@@ -22,8 +22,12 @@ cv_extraction:
     - "Language: Handle both English and Vietnamese text fluently."
     - "Precision: Only extract information explicitly stated. Do not hallucinate or invent details."
     - "Consistency: Standardize job titles and company names."
-    - "Missing Data: If a field is not found, return 'null' (single values) or [] (arrays)."
+    - "Missing Data: If a field is not found, return null (single values) or [] (arrays)."
     - "Formatting: Return the JSON object directly. DO NOT wrap in markdown code blocks."
+    - "Normalization: Use YYYY-MM for dates when possible; otherwise keep raw text."
+    - "Lists: Never return null for lists. Use [] instead."
+    - "Ordering: skills sorted by years_of_experience desc, then name asc; work_history sorted by start_date desc."
+    - "Rounding: total_experience_years and years_of_experience rounded to 1 decimal."
     - Remark_Rule: |
         IF (level == 'Advanced' OR 'Expert') AND (years_of_experience <= 2.0)
         THEN you MUST add exactly: "No proof of [Level] level for [Skill Name] found" to the 'remark' list of THAT skill.

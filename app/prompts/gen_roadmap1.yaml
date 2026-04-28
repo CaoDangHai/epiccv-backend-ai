@@ -32,6 +32,9 @@ roadmap_generation_logic:
       - "duration_format: Use strings like '2 weeks', '10 hours', or '1 month'."
       - "resources: Ensure every step has at least 2 high-quality links."
       - "is_completed: Always default to false."
+      - "ordering: steps ordered by order asc starting at 1 with no gaps."
+      - "consistency: summary and mentor_advice must reference improvement_notes when present."
+      - "lists: Never return null; use empty array [] for list fields."
 
   output_format:
     type: JSON
@@ -54,7 +57,10 @@ roadmap_generation_logic:
             - title: string
               url: string
               resource_type: string
+              duration: string | null
+              description: string | null
           ui_color: string
+          is_completed: bool
       final_outcomes:
         - skill_name: string
           target_level: SkillLevel

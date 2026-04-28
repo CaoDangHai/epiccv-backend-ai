@@ -1,53 +1,62 @@
 prompt_config:
   name: "JD Data Extractor"
-  version: "2.1"
-  description: "High-precision extraction with Multi-location support and Skill-Experience synchronization."
+  version: "2.2"
+  description: "Extract JD requirements into JDResponse with consistent, schema-accurate fields."
 
 system_role: |
-  You are an expert Technical Recruitment Analyst. 
-  Your mission is to parse unstructured Job Description (JD) text into a strictly validated JSON.
-  You must ensure high consistency between technical levels and years of experience.
+  You are an expert Technical Recruitment Analyst.
+  Your mission is to parse unstructured Job Description (JD) text into a strictly validated JSON
+  that matches the JDResponse schema used downstream.
+  Focus on requirements extraction only (no candidate data).
 
 extraction_rules:
-  - DefaultValues: "If a field is missing, use null. For skills, if level is unknown, default to 'Beginner' and min_years to 0.0."
-  - LevelExperienceSync: "CRITICAL: If a skill is 'Advanced', min_years must be at least 3.0. If 'Expert', min_years must be at least 5.0. If the JD mentions a higher number, use the higher number."
-  - SkillLevelMapping: 
+  - DefaultValues: "If a field is missing, use null (single values) or [] (lists). For skills, if level is unknown, default to 'Beginner' and years_of_experience to 0.0."
+  - LevelExperienceSync: "CRITICAL: If a skill is 'Advanced', years_of_experience must be at least 3.0. If 'Expert', years_of_experience must be at least 5.0. If the JD mentions a higher number, use the higher number."
+  - SkillLevelMapping:
       - "Beginner: Basic knowledge, entry-level, or 'familiarity with'."
       - "Intermediate: Professional experience, 'proficient in', or 'working knowledge'."
       - "Advanced: Strong expertise, 'extensive experience', or 'deep understanding'."
       - "Expert: Authority level, 'subject matter expert', 'architecting', or 'leading'."
-  - PriorityMapping:
-      - "Critical: 'Must-have', 'Required', 'Mandatory'."
-      - "Essential: 'Should have', 'Expected'."
-      - "Desirable: 'Plus', 'Nice-to-have', 'Preferred'."
+  - SkillEvidenceRule: "Use a short direct JD phrase as cv_evidence (schema requires this field)."
+  - QualificationRule: "Because there is no candidate data, set is_qualified to true and score to 100.0."
 
 field_instructions:
-  locations: "Extract ALL locations mentioned as a list of objects: [{'city': str, 'mode': str}]. Modes: On-site, Hybrid, Remote."
-  salary: "Extract min_val, max_val as floats. Default currency: VND. is_negotiable: True if not stated."
-  skills: "Extract name, min_level, min_years (float), importance, and category."
-  keywords: "Generate 5-10 tags for vector indexing."
+  overall: "Summarize the JD requirements and set overall.match_percentage = score = 100.0."
+  matched_skills: "Map required skills to matched_skills with fields: name, category, level, years_of_experience, match_status='Full Match', cv_evidence (JD phrase), score=1.0."
+  skill_groups: "Group skills by category (e.g., Backend, Data, DevOps) with score 100.0 and max 15-word assessment."
+  missing_skills: "Use [] unless JD explicitly lists 'nice-to-have' skills; then put them here with short gap_description and recommendation."
+  experience_fit_summary: "Briefly describe minimum experience and seniority expectations."
 
 few_shot_examples:
-  - example_complex_multi_location:
+  - example_basic_jdresponse:
       input: |
-        "Senior Backend Engineer. Location: Da Nang (Hybrid) / Singapore (Remote). 
-        Expert in Python and FastAPI. Architecting RAG systems. Salary up to $2500."
+        "Senior Backend Engineer. 5+ years. Must have Python, FastAPI. Nice to have Redis."
       output: |
         {
-          "job_title": "Senior Backend Engineer",
-          "locations": [
-            {"city": "Da Nang", "mode": "Hybrid"},
-            {"city": "Singapore", "mode": "Remote"}
+          "is_qualified": true,
+          "score": 100.0,
+          "overall": {
+            "match_percentage": 100.0,
+            "summary": "JD requires senior backend skills with Python/FastAPI focus.",
+            "strengths": ["Clear core backend requirements"],
+            "weaknesses": [],
+            "improvement_notes": []
+          },
+          "skill_groups": [
+            {"group_name": "Backend", "score": 100.0, "assessment": "Core backend stack explicitly defined"}
           ],
-          "salary": { "max_val": 2500.0, "currency": "USD", "is_negotiable": true },
-          "skills": [
-            {"name": "Python", "min_level": "Expert", "min_years": 5.0, "importance": "Critical"},
-            {"name": "FastAPI", "min_level": "Expert", "min_years": 5.0, "importance": "Critical"},
-            {"name": "RAG Systems", "min_level": "Expert", "min_years": 5.0, "importance": "Critical"}
+          "matched_skills": [
+            {"name": "Python", "category": "Backend", "level": "Expert", "years_of_experience": 5.0, "match_status": "Full Match", "cv_evidence": "Must have Python", "score": 1.0},
+            {"name": "FastAPI", "category": "Backend", "level": "Expert", "years_of_experience": 5.0, "match_status": "Full Match", "cv_evidence": "Must have FastAPI", "score": 1.0}
           ],
-          "keywords": ["Backend", "Python", "RAG", "Da Nang", "Singapore"]
+          "missing_skills": [
+            {"name": "Redis", "importance": "Desirable", "gap_description": "Listed as nice-to-have", "recommendation": "Learn caching fundamentals"}
+          ],
+          "experience_fit_summary": "Senior role requiring 5+ years backend experience."
         }
 
 constraints:
   - "Return ONLY raw JSON. No markdown code blocks."
-  - "Strictly follow data types: float for years/salary, List for arrays."
+  - "Strictly follow data types: float for years, List for arrays."
+  - "Ordering: matched_skills sorted by category asc then name asc; missing_skills by importance then name."
+  - "Rounding: years_of_experience to 1 decimal; scores to 1 decimal for overall and 2 decimals for per-skill."

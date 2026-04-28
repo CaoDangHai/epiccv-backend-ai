@@ -55,6 +55,9 @@ class Education(BaseModel):
     gpa: Optional[Union[float, str]] = None
 
 class Certification(BaseModel):
+    title: str = Field(validation_alias=AliasChoices('title', 'name'))
+    organization: Optional[str] = None
+    year: Optional[str] = None
     model_config = ConfigDict(extra='forbid')
     name: Optional[str] = "Unknown"
     issuer: Optional[str] = None
@@ -101,6 +104,7 @@ class CVResponse(BaseModel):
     languages: List[Language] = []
     top_strengths: List[str] = []
     remark: List[str] = [] 
+    model_config = ConfigDict(extra='ignore') # Nên để ignore để tránh sập app khi AI trả thừa data
 
     @field_validator('skills', 'work_history', 'education', 'projects', 'certifications', 'awards', 'languages', 'top_strengths', 'remark', mode='before')
     @classmethod

@@ -11,9 +11,9 @@ analysis_logic:
 
   chain_of_thought:
     1_deconstruct_jd: Extract Hard/Soft skills; assign RequirementPriority (Critical, Essential, Desirable); identify min_years and target_roles.
-    2_evidence_mining: Scan CV work_history and projects for concrete proof of JD skills; extract short snippets for cv_evidence.
+    2_evidence_mining: Scan CV work_history and projects for concrete proof of EVERY JD skill; extract short snippets for cv_evidence.
     3_level_mapping: Compare Candidate Level vs. JD Required Level; assign SkillLevel and MatchStatus (Full Match, Partial Match, Missing, Exceeds).
-    4_gap_quantification: Calculate total_years_gap (JD min_years - CV total_years); list missing_skills for roadmap.
+    4_gap_quantification: Calculate total_years_gap (JD min_years - CV total_years); list ALL missing_skills for roadmap (no omissions).
     5_fit_assessment: Evaluate culture_fit (tone/vibe) and industry_relevance based on past company profiles.
     6_final_synthesis: Compute weighted match_percentage; determine is_qualified; write recommendations.
 
@@ -23,12 +23,28 @@ analysis_logic:
       RequirementPriority: [Critical, Essential, Desirable]
       MatchStatus: [Full Match, Partial Match, Missing, Exceeds]
     rules:
-      - "is_qualified: True only if match_percentage > 60% AND all Critical skills are matched/exceeded."
+      - "is_qualified: True only if score > 60.0 AND all Critical skills are Full Match or Exceeds."
+      - "coverage: Enumerate every JD skill exactly once as either matched_skills or missing_skills. Never skip a JD skill."
+      - "missing_detection: If CV lacks clear evidence for a JD skill, mark it Missing and put it in missing_skills."
+      - "potential_note: If cv_level < jd_level but skill exists, set match_status to Partial Match, keep score lower, and add a remark indicating 'Potential to reach required level'."
+      - "penalty_critical_missing: Each Critical missing skill must reduce score by at least 20 points."
+      - "penalty_essential_missing: Each Essential missing skill must reduce score by at least 10 points."
+      - "penalty_desirable_missing: Each Desirable missing skill must reduce score by at least 3 points."
+      - "score_cap_for_critical_gap: If any Critical skill is Missing, score must be <= 40.0 and is_qualified must be False."
+      - "score_strictness: Avoid perfect scores by default; use 100.0 only if all JD skills are Full Match or Exceeds, no missing_skills, and evidence is strong across all Critical and Essential skills."
+      - "weaknesses_required: overall.weaknesses must contain at least 1 item; if no meaningful weakness, use 'No major weaknesses found'."
       - "cv_evidence: Max 15 words; must be a direct quote or specific project name from CV."
       - "lists: Never return null; use empty array [] if no data."
       - "logic: Ensure missing_skills descriptions are detailed enough for a learning roadmap generator."
-      - "mandatory_fields: Always calculate and include 'overall.match_percentage' and 'score' ."
-      - "consistency: score and overall.match_percentage must be identical and range from 0.0 to 100.0."
+      - "mandatory_fields: Always calculate and include both 'score' and 'overall.match_percentage'."
+      - "consistency: score and overall.match_percentage must be identical and within 0.0 to 100.0."
+      - "numeric_format: score and overall.match_percentage rounded to 1 decimal; per-skill score rounded to 2 decimals."
+      - "ordering: matched_skills sorted by importance (Critical, Essential, Desirable), then score desc, then name asc."
+      - "ordering: missing_skills sorted by importance (Critical, Essential, Desirable), then name asc."
+      - "string_normalization: trim whitespace; use Title Case for skill names unless acronym (SQL, NLP, AWS)."
+      - "enum_guard: cv_level and jd_level MUST be SkillLevel values only; never use MatchStatus words like 'Missing'."
+      - "missing_routing: If a skill is Missing, put it in missing_skills and do NOT include it in matched_skills."
+      - "unknown_levels: If you cannot infer a level, use 'Unknown' for cv_level/jd_level."
 
 
   output_format:
@@ -38,6 +54,7 @@ analysis_logic:
       is_qualified: bool
       score: float
       overall:
+        match_percentage: float
         summary: string
         strengths: [string]
         weaknesses: [string]
@@ -50,18 +67,24 @@ analysis_logic:
         industry_relevance: bool
       matched_skills:
         - name: string
+          category: string
           cv_level: SkillLevel
           jd_level: SkillLevel
+          years_of_experience: float
           match_status: MatchStatus
+          priority: RequirementPriority
+          weight: float
           cv_evidence: string
           score: float
+          remark: string | null
       missing_skills:
         - name: string
           importance: RequirementPriority
+          weight: float
           gap_description: string
           recommendation: string
 
-  final_directive: "Perform internal CoT reasoning. Ensure 'overall.match_percentage' is calculated and included. Output ONLY the raw JSON object."
+  final_directive: "Perform internal reasoning. Do not reveal chain-of-thought. Ensure 'score' equals 'overall.match_percentage'. Output ONLY the raw JSON object."
 
   reasoning_process_cot:
   instruction: "Before generating JSON, perform the following internal reasoning steps:"
