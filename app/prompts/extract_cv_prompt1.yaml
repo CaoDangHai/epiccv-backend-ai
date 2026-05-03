@@ -8,15 +8,15 @@ cv_extraction:
     The input text is extracted from CVs (PDF/Docx) and may contain noise like page numbers, 
     headers, or inconsistent formatting. Filter out noise but focus on professional content. 
     Ensure critical identification like Full Name, Email, and Phone are preserved.
-    Current Date: April 2026.
+    Current Date: May 2026.
 
   logic_priority:
-  - STEP_1_CLEAN: Filter noise, identify professional blocks (Summary, Experience, Projects).
-  - STEP_2_MATRIX_SCAN: Identify all technologies and map them to their base Languages/Stacks using the 'Implicit Tech Matrix'.
-  - STEP_3_CHRONO_MAPPING: Create a timeline for each technology. If 'React' is in Job A, then 'JavaScript' and 'Frontend' also exist in Job A's timeline.
-  - STEP_4_TOTAL_MATH: Sum ALL non-overlapping durations.
-  - STEP_5_SCHEMA_VALIDATION: Ensure 'social_links' nesting and field naming ('address', 'name') match the Pydantic schema exactly.
-  - STEP_6_REMARK_AUDIT: Perform a final 'Proof vs Level' check for every skill to trigger mandatory remarks.
+    - STEP_1_CLEAN: Filter noise, identify professional blocks (Summary, Experience, Projects).
+    - STEP_2_MATRIX_SCAN: Identify all technologies and map them to their base Languages/Stacks using the 'Implicit Tech Matrix'.
+    - STEP_3_CHRONO_MAPPING: Create a timeline for each technology. If 'ASP.NET Core' is in a Project, then 'C#' and '.NET' also exist in that timeline.
+    - STEP_4_TOTAL_MATH: Sum ALL non-overlapping durations.
+    - STEP_5_SCHEMA_VALIDATION: Ensure 'social_links' nesting and field naming ('address', 'name') match the Pydantic schema exactly.
+    - STEP_6_REMARK_AUDIT: Perform a final 'Proof vs Level' check for every skill to trigger mandatory remarks.
 
   instructions:
     - "Language: Handle both English and Vietnamese text fluently."
@@ -33,38 +33,30 @@ cv_extraction:
         THEN you MUST add exactly: "No proof of [Level] level for [Skill Name] found" to the 'remark' list of THAT skill.
 
   strict_rules: 
-    # QUY TẮC 1: LIÊN ĐỚI CÔNG NGHỆ (Implicit Skills)
     implicit_skill_verification: |
       "Recognize professional tech-stacks and their implicit languages:
-      - '.NET', 'ASP.NET', 'EF Core' -> Implicitly verifies 'C#'.
+      - '.NET Core', 'ASP.NET Core', 'EF Core', 'SignalR' -> Implicitly verifies 'C#'.
       - 'Spring Boot', 'Hibernate', 'JUnit' -> Implicitly verifies 'Java'.
       - 'FastAPI', 'Django', 'Flask' -> Implicitly verifies 'Python'.
-      If a stack is listed in a job, you MUST consider the underlying language verified for that specific duration."
-    # 1. ÉP CẤU TRÚC LỒNG NHAU (Fix lỗi 422 cho github/linkedin)
+      If a stack is listed in a job or project, you MUST consider the underlying language verified."
+
     nesting_enforcement: |
       "CRITICAL: 'github', 'linkedin', and 'portfolio' MUST be placed INSIDE the 'social_links' object. 
-      DO NOT put them at the root of the JSON. If they are at the root, the system will crash."
+      DO NOT put them at the root of the JSON."
 
-    # 2. ÉP TÊN TRƯỜNG CHUẨN (Chống lỗi 'location' và 'title')
     field_naming_enforcement: |
       "ALWAYS use 'address' (not 'location') in CVResponse. 
       ALWAYS use 'name' (not 'title') in Certification."
 
-    # 3. KIỂM TOÁN TỔNG NĂM KINH NGHIỆM (Chặn lỗi 3.8 năm)
     total_experience_audit: |
       "Calculation Task: Sum ALL job durations. 
-      (FPT Software: Jan 2019 - May 2022 = 3.4 years) + (TechVina: June 2022 - April 2026 = 3.8 years). 
-      The 'total_experience_years' MUST be 7.2. Do not just return 3.8."
+      (Example: Jan 2019 - May 2022 = 3.4 years) + (June 2022 - May 2026 = 3.9 years). 
+      The 'total_experience_years' MUST be 7.3. Do not just return the latest job duration."
 
-    # 4. ĐỐI CHIẾU BẰNG CHỨNG KỸ NĂNG (Chặn lỗi C# 3.8 năm)
     skill_evidence_mapping: |
-      "Check each skill against 'Work Experience'. 
-      If a skill (like C#) is only in Summary but not used in any job, years_of_experience MUST be 0.0. 
-      If Level >= Advanced and Years <= 2.0, you MUST add the remark."
-      
-     
-  
-
+      "CRITICAL: Check each skill against 'Work Experience' AND 'Technical Projects'. 
+      If a technology appears in the 'Projects' section (e.g., 'Real-time IoT Dashboard'), it is VALID evidence. 
+      For skills proven ONLY via projects, assign a duration of 0.5 to 1.0 year based on project scope."
   edge_cases:
     - "If a candidate lists skills as a single long string separated by commas, split them into a List of Strings."
     - "If 'education' doesn't specify a degree, use 'High School' or 'Unknown' based on context."
