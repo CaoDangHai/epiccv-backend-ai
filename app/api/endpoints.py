@@ -121,7 +121,7 @@ async def full_analysis_pipeline(cv_file: UploadFile = File(...), jd_file: Uploa
         # Trả về response phẳng để backend-core đọc được ngay
         return {
             "full_cv": full_cv.model_dump(),
-            **analysis_result.model_dump(by_alias=True),
+            **analysis_result.model_dump(by_alias=True)  # Sử dụng alias nếu có trong ComparisonAnalysisResponse,
         }
 
     except Exception as e:

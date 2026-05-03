@@ -27,7 +27,7 @@ class JdService:
         """Đọc và format prompt"""
         try:
             # Đường dẫn đến file YAML trích xuất JD
-            prompt_path = os.path.join("app", "prompts", "extract_jd_prompt1.yaml")
+            prompt_path = os.path.join("app", "prompts", "extract_jd_prompt2.yaml")
             
             if not os.path.exists(prompt_path):
                 raise FileNotFoundError(f"Không tìm thấy file: {prompt_path}")

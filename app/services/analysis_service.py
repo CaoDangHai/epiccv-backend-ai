@@ -29,7 +29,7 @@ class AnalysisService:
     def _load_system_prompt(self) -> str:
         """Reads and formats the analysis logic from YAML"""
         try:
-            prompt_path = os.path.join("app", "prompts", "analysis_prompt1.yaml")
+            prompt_path = os.path.join("app", "prompts", "analysis_prompt2.yaml")
             with open(prompt_path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
             

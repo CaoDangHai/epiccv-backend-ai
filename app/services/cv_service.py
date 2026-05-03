@@ -28,7 +28,7 @@ class CvService:
         """Hàm phụ trợ để đọc và format prompt từ YAML"""
         try:
             # Đường dẫn tìm đến file YAML trong folder core
-            prompt_path = os.path.join("app", "prompts", "extract_cv_prompt1.yaml")
+            prompt_path = os.path.join("app", "prompts", "extract_cv_prompt2.yaml")
             with open(prompt_path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
             
