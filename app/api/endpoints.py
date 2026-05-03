@@ -101,25 +101,29 @@ async def generate_roadmap(cv_data: FilteredCVResponse, jd_data: JDResponse):
 
 @router.post("/full-pipeline")
 async def full_analysis_pipeline(cv_file: UploadFile = File(...), jd_file: UploadFile = File(...)):
-    # Bước 1: Trích xuất CV đầy đủ (Full CV)
-    cv_content = await cv_file.read()
-    raw_cv_text = cv_content.decode("utf-8")
-    full_cv = await cv_service.extract_cv_data(raw_cv_text) # Trả về CVResponse
+    try:
+        # Bước 1: Trích xuất CV đầy đủ
+        cv_content = await cv_file.read()
+        raw_cv_text = cv_content.decode("utf-8")
+        full_cv = await cv_service.extract_cv_data(raw_cv_text)
 
-    # Bước 2: Biến đổi thành Filtered CV (Lọc PII)
+        # Bước 2: Chuyển sang CV đã lọc
+        filtered_cv = full_cv.to_filtered()
 
-    filtered_cv = full_cv.to_filtered() # Trả về FilteredCVResponse, đã lọc PII và chỉ giữ lại phần cần thiết cho phân tích và tạo roadmap
+        # Bước 3: Trích xuất JD
+        jd_content = await jd_file.read()
+        raw_jd_text = jd_content.decode("utf-8")
+        jd_data = await jd_service.extract_jd_data(raw_jd_text)
 
-    # Bước 3: Trích xuất JD
-    jd_content = await jd_file.read()
-    raw_jd_text = jd_content.decode("utf-8")
-    jd_data = await jd_service.extract_jd_data(raw_jd_text) # Trả về JDResponse
+        # Bước 4: So sánh CV với JD
+        analysis_result = await analysis_service.compare_cv_with_jd(filtered_cv, jd_data)
 
+        # Trả về response phẳng để backend-core đọc được ngay
+        return {
+            "full_cv": full_cv.model_dump(),
+            **analysis_result.model_dump(by_alias=True),
+        }
 
-    # Bước 4: Truyền vào Analysis Service để đối chiếu
-    analysis_result = await analysis_service.compare_cv_with_jd(filtered_cv, jd_data) #
-
-    return {
-        "full_cv": full_cv, # Trả về để hiện trên UI cho user sửa nếu cần
-        "analysis": analysis_result
-    }
+    except Exception as e:
+        logger.error(f"Lỗi tại endpoint full-pipeline: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Lỗi xử lý full pipeline: {str(e)}")
