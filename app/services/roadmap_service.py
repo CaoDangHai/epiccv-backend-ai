@@ -1,3 +1,5 @@
+import json
+
 import yaml
 import os
 import logging
@@ -53,7 +55,7 @@ class RoadmapService:
         """
         Generates a personalized learning roadmap for the candidate based on the CV and JD analysis.
         """
-        try:
+        try: 
             
             human_message = f"Comparison Result:\n{result_data.model_dump_json()}"
             
@@ -61,6 +63,7 @@ class RoadmapService:
                 ("system", self.system_message),
                 ("human", human_message)    
             ])
+            
             return result
         except (ValidationError, OutputParserException) as e:
             logger.error(f"Output parsing error in Roadmap generation: {e}")

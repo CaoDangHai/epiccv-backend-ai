@@ -66,7 +66,7 @@ class JdService:
             ])
             result_json = result.model_dump()  # hoặc model_dump(mode='json') nếu có kiểu đặc biệt
             pretty_output = json.dumps(result_json, indent=2, ensure_ascii=False)
-            logger.info("Dữ liệu CV sau khi parse:\n" + pretty_output)
+            logger.info("Dữ liệu JD sau khi parse:\n" + pretty_output)
             return result
 
         except ValidationError as ve:
