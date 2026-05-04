@@ -47,6 +47,23 @@ instructions:
   - "  description arrays should be concise bullet-like items extracted from the text."
   - "Output language: keep original language of source text where possible (e.g., Vietnamese bullets remain Vietnamese)."
 
+  # --- HARDENING (added) ---
+  - "ABSOLUTE FORMAT RULE: Output EXACTLY one JSON object and NOTHING else (no leading/trailing text)."
+  - "NO EXTRA FIELDS: Do not output any keys not defined in CVResponse (including nested models)."
+  - "NO MISSING FIELDS: Always include every field listed in must_include_all_fields, even if null/empty/default."
+  - "TYPE STRICTNESS:"
+  - "  - All list fields must be JSON arrays ([]) even when there is a single item."
+  - "  - social_links.other must always be an array."
+  - "  - years_of_experience and total_experience_years must be numbers (use 0.0 when unknown)."
+  - "  - is_current must be boolean only (true/false)."
+  - "ENUM STRICTNESS: Only use SkillLevel values exactly as spelled: Beginner|Intermediate|Advanced|Expert|Unknown."
+  - "SANITIZATION: Remove any duplicated keys, comments, markdown fences, or trailing commas."
+  - "FINAL SELF-CHECK BEFORE OUTPUT:"
+  - "  1) Validate JSON parses."
+  - "  2) Validate all required keys exist."
+  - "  3) Validate no unknown keys exist."
+  - "  4) Validate list fields are arrays, not strings."
+
 schema_contract:
   output_type: "CVResponse"
   must_include_all_fields:

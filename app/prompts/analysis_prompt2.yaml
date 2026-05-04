@@ -64,6 +64,26 @@ instructions:
   - "  Include only MISSING skills (and optionally the most important PARTIAL gaps if clearly needed; keep list short)."
   - "  recommendation must be actionable and concrete (course/project/practice), not generic."
 
+  # --- HARDENING (added) ---
+  - "ABSOLUTE FORMAT RULE: Output EXACTLY one JSON object and NOTHING else."
+  - "NO EXTRA FIELDS: Only output keys defined in ComparisonAnalysisResponse (and its nested models)."
+  - "NO MISSING FIELDS: Always output ALL required_fields in schema_contract."
+  - "ALIAS STRICTNESS:"
+  - "  - Output key must be \"score\" (alias for match_percentage) at the top level."
+  - "  - Inside matched_skills entries, output \"cv_level\" and \"jd_level\" (aliases), not level_cv/level_jd_req."
+  - "NUMERIC STRICTNESS:"
+  - "  - score must be 0..1 (float)."
+  - "  - overall.match_percentage must be 0..100 and MUST equal score*100 (same value after conversion; no drift)."
+  - "  - total_years_gap must be a number (float)."
+  - "LIST STRICTNESS: matched_skills and missing_skills must be arrays (possibly empty)."
+  - "ENUM STRICTNESS: Use only enum strings from schemas (SkillLevel, RequirementPriority, MatchStatus)."
+  - "FINAL SELF-CHECK BEFORE OUTPUT:"
+  - "  1) JSON parses."
+  - "  2) Contains all required fields."
+  - "  3) Contains no unknown fields."
+  - "  4) score == overall.match_percentage/100 exactly."
+  - "  5) All array fields are arrays (not strings)."
+
 schema_contract:
   output_type: "ComparisonAnalysisResponse"
   required_fields:
