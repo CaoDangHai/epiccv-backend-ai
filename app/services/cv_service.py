@@ -1,3 +1,5 @@
+import json
+
 import yaml
 import os
 import logging
@@ -59,8 +61,10 @@ class CvService:
                 ("system", self.system_message),
                 ("human", raw_text)
             ])
+            result_json = result.model_dump()  # hoặc model_dump(mode='json') nếu có kiểu đặc biệt
+            pretty_output = json.dumps(result_json, indent=2, ensure_ascii=False)
+            logger.info("Dữ liệu CV sau khi parse:\n" + pretty_output)
             return result
-
         except ValidationError as ve:
             logger.warning(f"Dữ liệu AI trả về không khớp Schema: {str(ve)}")
             raise HTTPException(

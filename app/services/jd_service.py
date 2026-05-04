@@ -1,3 +1,5 @@
+import json
+
 import yaml
 import os
 import logging
@@ -56,11 +58,15 @@ class JdService:
     async def extract_jd_data(self, raw_text: str) -> JDResponse:
         """Hàm chính gọi AI để xử lý văn bản JD thô"""
         try:
+            logger.info(f"Độ dài văn bản JD nhận được: {len(raw_text)} ký tự")
             # Gọi Gemini xử lý structured output
             result = await self.structured_llm.ainvoke([
                 ("system", self.system_message),
                 ("human", raw_text)
             ])
+            result_json = result.model_dump()  # hoặc model_dump(mode='json') nếu có kiểu đặc biệt
+            pretty_output = json.dumps(result_json, indent=2, ensure_ascii=False)
+            logger.info("Dữ liệu CV sau khi parse:\n" + pretty_output)
             return result
 
         except ValidationError as ve:
