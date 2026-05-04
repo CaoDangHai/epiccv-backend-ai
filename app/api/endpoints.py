@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, UploadFile, File, HTTPException
 # Import trực tiếp instance đã tạo sẵn từ file service
 from app.schemas.result import ComparisonAnalysisResponse
 from app.schemas.roadmap import LearningRoadmapResponse
-from app.services import roadmap_service
+from app.services.roadmap_service import roadmap_service
 from app.services.analysis_service import analysis_service
 from app.services.cv_service import cv_service 
 from app.services.jd_service import jd_service
@@ -91,9 +91,9 @@ async def compare_cv_jd(cv_data: FilteredCVResponse, jd_data: JDResponse):
     
 
 @router.post("/generate-roadmap",response_model= LearningRoadmapResponse)
-async def generate_roadmap(cv_data: FilteredCVResponse, jd_data: JDResponse):
+async def generate_roadmap(result_data: ComparisonAnalysisResponse):
     try:
-        roadmap = await roadmap_service.generate_roadmap(cv_data, jd_data)
+        roadmap = await roadmap_service.generate_roadmap(result_data)
         return roadmap
     except Exception as e:
         logger.error(f"Lỗi tại Endpoint Generate Roadmap: {str(e)}")
@@ -118,10 +118,13 @@ async def full_analysis_pipeline(cv_file: UploadFile = File(...), jd_file: Uploa
         # Bước 4: So sánh CV với JD
         analysis_result = await analysis_service.compare_cv_with_jd(filtered_cv, jd_data)
 
+        # Bước 5 : Gen roadmap
+        roadmap = await roadmap_service.generate_roadmap(analysis_result)
         # Trả về response phẳng để backend-core đọc được ngay
         return {
             "full_cv": full_cv.model_dump(),
-            **analysis_result.model_dump(by_alias=True)  # Sử dụng alias nếu có trong ComparisonAnalysisResponse,
+            **analysis_result.model_dump(by_alias=True),  # Sử dụng alias nếu có trong ComparisonAnalysisResponse,
+            "roadmap": roadmap.model_dump()
         }
 
     except Exception as e:

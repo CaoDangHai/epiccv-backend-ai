@@ -18,6 +18,25 @@ jd_extraction:
     - "job_context is REQUIRED (role_mission and ideal_persona must be present):"
     - "* If JD lacks explicit mission/persona, write short conservative summaries derived from JD wording, not invented specifics."
     - "* working_culture and growth_opportunities can be empty arrays if not present."
+
+    # --- HARDENING (added) ---
+    - "ABSOLUTE FORMAT RULE: Output EXACTLY one JSON object and NOTHING else."
+    - "NO EXTRA FIELDS: Do not output any keys not defined in JDResponse/JDContext/JDSkillRequirement/JDSalary."
+    - "NO MISSING FIELDS: Always include every field listed in must_include_all_fields (use defaults/empty arrays/null where applicable)."
+    - "TYPE STRICTNESS:"
+    - "  - All list fields must be arrays ([]) even if only one item exists."
+    - "  - min_total_experience_years and min_years must be numbers (use 0.0 if not stated)."
+    - "  - weight must be a number within 0.5..2.0 (default 1.0 unless explicitly emphasized)."
+    - "  - is_mandatory must be boolean only."
+    - "ENUM STRICTNESS:"
+    - "  - SkillLevel must be exactly: Beginner|Intermediate|Advanced|Expert|Unknown."
+    - "  - RequirementPriority must be exactly: Critical|Essential|Desirable."
+    - "FINAL SELF-CHECK BEFORE OUTPUT:"
+    - "  1) Validate JSON parses."
+    - "  2) Validate job_context exists and contains role_mission + ideal_persona."
+    - "  3) Validate no unknown keys exist."
+    - "  4) Validate arrays are arrays, not strings."
+
 extraction_rules:
   - SkillAnalysis: "For each skill, determine priority: 'Critical' (must-have/deal-breaker), 'Essential' (needed for daily tasks), or 'Desirable' (bonus)."
   - Weighting: "Assign 'weight' between 0.5 and 2.0. A primary skill like 'Java' in a 'Java Dev' role gets 2.0. Soft skills usually get 0.8."
@@ -43,4 +62,3 @@ schema_contract:
     - "benefits"
     - "industry_tags"
     - "tool_stack"
-

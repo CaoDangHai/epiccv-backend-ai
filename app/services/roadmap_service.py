@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from fastapi import HTTPException
 from pydantic import ValidationError
 from langchain_core.exceptions import OutputParserException
+from app.schemas.result import ComparisonAnalysisResponse
 from app.schemas.roadmap import LearningRoadmapResponse
 from app.core.llm import LLMFactory
 from app.schemas.cv import FilteredCVResponse
@@ -17,7 +18,7 @@ load_dotenv()
 class RoadmapService:
     def __init__(self):
         # 1. Initialize LLM with Structured Output
-        self.llm = LLMFactory.get_model("gemini-3-flash") #
+        self.llm = LLMFactory.get_model("gpt-4.1-mini") #
         self.structured_llm = self.llm.with_structured_output(LearningRoadmapResponse, method="function_calling")
 
         # 2. Load the System Prompt from YAML
@@ -26,7 +27,7 @@ class RoadmapService:
     def _load_system_prompt(self) -> str:
         """Reads and formats the roadmap generation logic from YAML"""
         try:
-            prompt_path = os.path.join("app", "prompts", "gen_roadmap1.yaml")
+            prompt_path = os.path.join("app", "prompts", "gen_roadmap2.yaml")
             with open(prompt_path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
             
@@ -48,13 +49,13 @@ class RoadmapService:
             logger.error(f"Error loading Roadmap YAML: {e}")
             return "Generate a learning roadmap based on the CV and JD analysis."
     
-    async def generate_roadmap(self, cv_data: FilteredCVResponse, jd_data: JDResponse) -> LearningRoadmapResponse:
+    async def generate_roadmap(self, result_data: ComparisonAnalysisResponse) -> LearningRoadmapResponse:
         """
         Generates a personalized learning roadmap for the candidate based on the CV and JD analysis.
         """
         try:
             
-            human_message = f"CV Data:\n{cv_data.model_dump_json()}\n\nJD Data:\n{jd_data.model_dump_json()}"
+            human_message = f"Comparison Result:\n{result_data.model_dump_json()}"
             
             result = await self.structured_llm.ainvoke([
                 ("system", self.system_message),

@@ -38,8 +38,6 @@ class RoadmapStep(BaseModel):
 
 class LearningRoadmapResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
-    roadmap_id: Optional[str] = None
     target_job_title: str
     summary: str = Field(..., description="Overview of the learning journey")
     difficulty: str = "Intermediate"

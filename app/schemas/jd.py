@@ -33,7 +33,7 @@ class JDResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, extra='ignore')
 
     # 1. Thông tin định danh
-    job_title: str
+    job_title: str = "Unknown Position"
     company_name: str = "Unknown"
     job_location: Optional[str] = None
     employment_type: str = "Full-time" # Remote, Hybrid...
