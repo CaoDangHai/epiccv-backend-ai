@@ -54,3 +54,4 @@ app/db/database.py: Quản lý kết nối PostgreSQL.
 
 app/services/: Chứa các logic xử lý AI và nghiệp vụ.
 
+poetry run uvicorn main:app --reload
