@@ -1,132 +1,120 @@
-from fastapi import APIRouter, Body, UploadFile, File, HTTPException
-# Import trực tiếp instance đã tạo sẵn từ file service
+import logging
+
+from fastapi import APIRouter, UploadFile, File, HTTPException
+
 from app.schemas.result import ComparisonAnalysisResponse
 from app.schemas.roadmap import LearningRoadmapResponse
 from app.services.roadmap_service import roadmap_service
 from app.services.analysis_service import analysis_service
-from app.services.cv_service import cv_service 
+from app.services.cv_service import cv_service
 from app.services.jd_service import jd_service
 from app.schemas.jd import JDResponse
 from app.schemas.cv import CVResponse, FilteredCVResponse
-import logging
-    
 
 logger = logging.getLogger("uvicorn.error")
 router = APIRouter()
+
 
 @router.get("/health")
 def health_check():
     return {"status": "ok", "message": "EpicCV AI Engine is active!"}
 
+
 @router.post("/extract-cv", response_model=CVResponse)
 async def extract_cv(file: UploadFile = File(...)):
     try:
-        # Đọc file
         content = await file.read()
         try:
             text = content.decode("utf-8")
         except UnicodeDecodeError:
-            raise HTTPException(status_code=400, detail="Vui lòng upload file text định dạng UTF-8.")
+            raise HTTPException(status_code=400, detail="Please upload a UTF-8 text file.")
 
         if not text.strip():
-            raise HTTPException(status_code=400, detail="CV không có nội dung để phân tích.")
+            raise HTTPException(status_code=400, detail="CV content is empty.")
 
-        
         cv_data = await cv_service.extract_cv_data(text)
-
         if cv_data is None:
-            # Nếu service trả về None, phải báo lỗi ngay
-            raise HTTPException(
-                status_code=500,
-                detail="LLM không trả về kết quả hợp lệ."
-            )
+            raise HTTPException(status_code=500, detail="LLM did not return a valid result.")
 
         return cv_data
 
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Lỗi tại Endpoint: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Lỗi xử lý: {str(e)}")
-    
+        logger.error(f"CV extraction endpoint error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"CV extraction failed: {str(e)}")
+
 
 @router.post("/extract-jd", response_model=JDResponse)
 async def extract_jd(file: UploadFile = File(None), jd_text: str = None):
-    """
-    Endpoint trích xuất thông tin JD. 
-    Hỗ trợ cả upload file (.txt) hoặc dán text trực tiếp.
-    """
     try:
         text = ""
-        # 1. Ưu tiên xử lý file nếu có upload
         if file:
             content = await file.read()
             try:
                 text = content.decode("utf-8")
             except UnicodeDecodeError:
-                raise HTTPException(status_code=400, detail="Vui lòng upload file text định dạng UTF-8.")
-        
-        # 2. Nếu không có file thì lấy từ field jd_text (cho trường hợp paste text từ UI)
+                raise HTTPException(status_code=400, detail="Please upload a UTF-8 text file.")
         elif jd_text:
             text = jd_text
-            
+
         if not text or not text.strip():
-            raise HTTPException(status_code=400, detail="Nội dung JD không được để trống.")
+            raise HTTPException(status_code=400, detail="Job description content cannot be empty.")
 
-        # 3. Gọi service xử lý trích xuất (Sử dụng Prompt YAML English đã tạo trước đó)
-        jd_data = await jd_service.extract_jd_data(text)
+        return await jd_service.extract_jd_data(text)
 
-        return jd_data
-
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Lỗi tại Endpoint JD: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Lỗi xử lý trích xuất JD: {str(e)}")
-    
+        logger.error(f"JD extraction endpoint error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"JD extraction failed: {str(e)}")
+
+
 @router.post("/compare", response_model=ComparisonAnalysisResponse)
 async def compare_cv_jd(cv_data: FilteredCVResponse, jd_data: JDResponse):
     try:
-        result = await analysis_service.compare_cv_with_jd(cv_data, jd_data)
-        return result
+        return await analysis_service.compare_cv_with_jd(cv_data, jd_data)
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Lỗi tại Endpoint Compare: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Lỗi xử lý so sánh: {str(e)}"    )
-    
+        logger.error(f"Compare endpoint error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Comparison failed: {str(e)}")
 
-@router.post("/generate-roadmap",response_model= LearningRoadmapResponse)
+
+@router.post("/generate-roadmap", response_model=LearningRoadmapResponse)
 async def generate_roadmap(result_data: ComparisonAnalysisResponse):
     try:
-        roadmap = await roadmap_service.generate_roadmap(result_data)
-        return roadmap
+        return await roadmap_service.generate_roadmap(result_data)
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Lỗi tại Endpoint Generate Roadmap: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Lỗi xử lý tạo lộ trình: {str(e)}")
+        logger.error(f"Generate roadmap endpoint error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Roadmap generation failed: {str(e)}")
+
 
 @router.post("/full-pipeline")
 async def full_analysis_pipeline(cv_file: UploadFile = File(...), jd_file: UploadFile = File(...)):
     try:
-        # Bước 1: Trích xuất CV đầy đủ
         cv_content = await cv_file.read()
         raw_cv_text = cv_content.decode("utf-8")
         full_cv = await cv_service.extract_cv_data(raw_cv_text)
-
-        # Bước 2: Chuyển sang CV đã lọc
         filtered_cv = full_cv.to_filtered()
 
-        # Bước 3: Trích xuất JD
         jd_content = await jd_file.read()
         raw_jd_text = jd_content.decode("utf-8")
         jd_data = await jd_service.extract_jd_data(raw_jd_text)
 
-        # Bước 4: So sánh CV với JD
         analysis_result = await analysis_service.compare_cv_with_jd(filtered_cv, jd_data)
-
-        # Bước 5 : Gen roadmap
         roadmap = await roadmap_service.generate_roadmap(analysis_result)
-        # Trả về response phẳng để backend-core đọc được ngay
+
         return {
             "full_cv": full_cv.model_dump(),
-            **analysis_result.model_dump(by_alias=True),  # Sử dụng alias nếu có trong ComparisonAnalysisResponse,
-            "roadmap": roadmap.model_dump()
+            **analysis_result.model_dump(by_alias=True),
+            "roadmap": roadmap.model_dump(),
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Lỗi tại endpoint full-pipeline: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Lỗi xử lý full pipeline: {str(e)}")
+        logger.error(f"Full pipeline endpoint error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Full pipeline failed: {str(e)}")

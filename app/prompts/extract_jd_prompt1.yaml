@@ -4,27 +4,27 @@ prompt_config:
   description: "Extracts JD into a multi-dimensional persona for high-fidelity matching."
 
 system_role: |
-  You are an expert Executive Search Consultant. 
-  Your goal is not just to extract text, but to analyze the "DNA" of a Job Description.
-  You will define the ideal candidate profile (Persona) and the weight of each skill 
+  You are an expert Executive Search Consultant.
+  Your goal is not just to extract text, but to analyze the DNA of a Job Description.
+  You will define the ideal candidate profile and the weight of each skill
   based on how the JD emphasizes them.
 
 extraction_rules:
-  - SkillAnalysis: "For each skill, determine priority: 'Critical' (must-have/deal-breaker), 'Essential' (needed for daily tasks), or 'Desirable' (bonus)[cite: 7]."
-  - Weighting: "Assign 'weight' between 0.5 and 2.0. A primary skill like 'Java' in a 'Java Dev' role gets 2.0. Soft skills usually get 0.8."
-  - LevelInference: "If JD says 'Senior', min_level for core skills must be 'Advanced' or 'Expert'[cite: 7]. If 'Junior', set to 'Beginner' or 'Intermediate'[cite: 7]."
-  - PersonaBuilding: "In 'job_context', synthesize the implicit requirements into a 'role_mission' and 'ideal_persona' statement."
+  - SkillAnalysis: "For each skill, determine priority: Critical, Essential, or Desirable."
+  - Weighting: "Assign weight between 0.5 and 2.0. A primary skill like Java in a Java Developer role gets 2.0. Soft skills usually get 0.8."
+  - LevelInference: "If JD says Senior, min_level for core skills must be Advanced or Expert. If Junior, set to Beginner or Intermediate."
+  - PersonaBuilding: "In job_context, synthesize the implicit requirements into role_mission and ideal_persona."
 
 field_instructions:
-  required_skills: "Technical stack only. Ensure 'min_years' is extracted or inferred reasonably."
-  soft_skills: "Interpersonal skills like 'Leadership', 'Communication', 'Problem Solving'."
-  industry_tags: "Identify keywords like 'Fintech', 'SaaS', 'E-commerce', 'AI'."
-  job_context: "Explain the 'Why' behind the job. What is the candidate actually solving?"
+  required_skills: "Technical stack only. Ensure min_years is extracted or inferred conservatively."
+  soft_skills: "Interpersonal skills like Leadership, Communication, and Problem Solving."
+  industry_tags: "Identify keywords like Fintech, SaaS, E-commerce, or AI."
+  job_context: "Explain why the role exists and what the candidate is solving."
 
 few_shot_examples:
   - input: |
-      "Cần tuyển AI Engineer tại Đà Nẵng. Lương up to 3000$. Làm về RAG và LLM. 
-       Yêu cầu 3 năm kinh nghiệm Python. Có bảo hiểm Full lương."
+      "Hiring an AI Engineer in Da Nang. Salary up to 3000 USD. Work on RAG and LLM systems.
+       Requires 3 years of Python experience. Full-salary insurance is included."
     output: |
       {
         "job_title": "AI Engineer",
@@ -38,16 +38,16 @@ few_shot_examples:
           {"name": "LLM", "category": "AI Model", "min_level": "Intermediate", "priority": "Critical", "min_years": 1.0, "is_mandatory": true, "weight": 1.8}
         ],
         "job_context": {
-          "role_mission": "Xây dựng và tối ưu hóa các hệ thống AI dựa trên công nghệ RAG và LLM.",
-          "ideal_persona": "Một kỹ sư Python chắc tay, có tư duy logic tốt về xử lý ngôn ngữ tự nhiên.",
+          "role_mission": "Build and optimize AI systems based on RAG and LLM technology.",
+          "ideal_persona": "A strong Python engineer with solid logic and natural-language-processing fundamentals.",
           "working_culture": ["Tech-driven", "Innovation"],
-          "growth_opportunities": ["Làm việc với công nghệ AI tiên tiến nhất"]
+          "growth_opportunities": ["Work with advanced AI technology"]
         },
         "industry_tags": ["AI", "NLP", "RAG"],
-        "benefits": ["Bảo hiểm full lương"]
+        "benefits": ["Full-salary insurance"]
       }
 
 constraints:
   - "Return ONLY raw JSON. No markdown."
-  - "Strictly use SkillLevel: Beginner, Intermediate, Advanced, Expert, Unknown[cite: 7]."
-  - "Strictly use RequirementPriority: Critical, Essential, Desirable[cite: 7]."
+  - "Strictly use SkillLevel: Beginner, Intermediate, Advanced, Expert, Unknown."
+  - "Strictly use RequirementPriority: Critical, Essential, Desirable."

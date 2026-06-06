@@ -31,7 +31,7 @@ class ComparisonAnalysisResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     is_qualified: bool 
-    match_percentage: float = Field(..., alias="score")
+    match_percentage: float = Field(..., alias="score", ge=0, le=100)
     overall: OverallAssessment
     experience_alignment: str = Field(..., description="Alignment with required_positions and responsibilities")
     total_years_gap: float = Field(..., description="Difference between CV total_years and JD min_total_years")
