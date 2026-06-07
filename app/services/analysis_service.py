@@ -12,7 +12,7 @@ from langchain_core.exceptions import OutputParserException
 from pydantic import ValidationError
 
 from app.core.llm import LLMFactory
-from app.schemas.result import ComparisonAnalysisResponse
+from app.schemas.result import ComparisonAnalysisResponse, SkillGap
 from app.schemas.cv import FilteredCVResponse
 from app.schemas.jd import JDResponse, JDSkillRequirement
 from app.schemas.shared import MatchStatus
@@ -123,7 +123,7 @@ class AnalysisService:
             normalized_percent = round(self._clamp(percent, 0, 100), 2)
             result.match_percentage = normalized_percent
             result.overall.match_percentage = normalized_percent
-            self._sync_skill_lists(result, skill_scores)
+            self._sync_skill_lists(result, jd_data, skill_scores)
             self._refresh_summary(result)
             return result
 
@@ -275,11 +275,15 @@ class AnalysisService:
     def _sync_skill_lists(
         self,
         result: ComparisonAnalysisResponse,
+        jd_data: JDResponse,
         skill_scores: dict[str, float],
     ) -> None:
+        synced_matched_skills = []
         for skill in result.matched_skills:
             score = skill_scores.get(self._canonical_name(skill.name))
             if score is None:
+                if self._normalize_skill_score(skill.score) >= 0.5:
+                    synced_matched_skills.append(skill)
                 continue
             skill.score = round(score, 2)
             if score >= 0.85:
@@ -288,15 +292,38 @@ class AnalysisService:
                 skill.match_status = MatchStatus.PARTIAL_MATCH
             else:
                 skill.match_status = MatchStatus.MISSING
+            if score >= 0.5:
+                synced_matched_skills.append(skill)
 
-        result.missing_skills = [
-            gap
+        missing_by_name = {
+            self._canonical_name(gap.name): gap
             for gap in result.missing_skills
             if skill_scores.get(self._canonical_name(gap.name), 0) < 0.5
-        ]
+        }
+
+        for requirement in self._all_jd_requirements(jd_data):
+            name_key = self._canonical_name(requirement.name)
+            if not name_key or skill_scores.get(name_key, 0) >= 0.5:
+                continue
+
+            existing_gap = missing_by_name.get(name_key)
+            if existing_gap:
+                existing_gap.importance = requirement.priority
+                existing_gap.weight = self._safe_weight(requirement.weight)
+                continue
+
+            missing_by_name[name_key] = self._build_skill_gap(requirement)
+
+        result.matched_skills = synced_matched_skills
+        result.missing_skills = sorted(
+            missing_by_name.values(),
+            key=lambda gap: (
+                self._priority_rank(gap.importance),
+                self._canonical_name(gap.name),
+            ),
+        )
         result.is_qualified = not any(
-            skill_scores.get(self._canonical_name(gap.name), 0) < 0.5
-            and self._priority_value(gap.importance) == "Critical"
+            self._priority_value(gap.importance) in {"Critical", "Essential"}
             for gap in result.missing_skills
         )
 
@@ -314,6 +341,36 @@ class AnalysisService:
         result.overall.summary = (
             f"The candidate is a {verdict} for this role with a {score:.0f}% match. "
             f"The profile shows relevant accounting experience, while the remaining gaps are {gap_text}."
+        )
+
+    def _all_jd_requirements(self, jd_data: JDResponse) -> list[JDSkillRequirement]:
+        return list(jd_data.required_skills or []) + list(jd_data.soft_skills or [])
+
+    def _build_skill_gap(self, requirement: JDSkillRequirement) -> SkillGap:
+        priority = self._priority_value(requirement.priority)
+        min_years_text = (
+            f" with at least {requirement.min_years:g} years of experience"
+            if requirement.min_years
+            else ""
+        )
+        return SkillGap(
+            name=requirement.name,
+            importance=requirement.priority,
+            weight=self._safe_weight(requirement.weight),
+            gap_description=(
+                f"No sufficient CV evidence was found for the {priority.lower()} requirement "
+                f"'{requirement.name}'{min_years_text}."
+            ),
+            recommendation=(
+                f"Build and document hands-on evidence for {requirement.name}; "
+                "prioritize a portfolio task or work example that demonstrates this requirement clearly."
+            ),
+        )
+
+    def _priority_rank(self, value: object) -> int:
+        return {"Critical": 0, "Essential": 1, "Desirable": 2}.get(
+            self._priority_value(value),
+            3,
         )
 
     def _flatten_model(self, value: object) -> str:
