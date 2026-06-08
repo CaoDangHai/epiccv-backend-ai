@@ -16,6 +16,7 @@ class LLMFactory:
 
     YES_SCALE_MODELS = {
         "deepseek-v4-pro": {"temp": 0},
+        "gpt-4.1": {"temp": 0},
         "gpt-4o": {"temp": 0.2},
         "gpt-4.1-mini": {"temp": 0},
         "gpt-4o-mini": {"temp": 0},

@@ -17,7 +17,7 @@ load_dotenv()
 
 class JdService:
     def __init__(self):
-        self.llm = LLMFactory.get_model("deepseek-v4-pro")
+        self.llm = LLMFactory.get_model("gpt-4.1")
         self.structured_llm = self.llm.with_structured_output(
             JDResponse,
             method="function_calling",
