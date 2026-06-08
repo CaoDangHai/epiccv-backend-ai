@@ -1,4 +1,6 @@
+import asyncio
 import logging
+from typing import Any
 
 from langchain_openai import ChatOpenAI
 
@@ -59,3 +61,40 @@ class LLMFactory:
     @classmethod
     def clear_cache(cls):
         cls._instances.clear()
+
+
+async def ainvoke_structured_with_retry(
+    structured_llm: Any,
+    messages: list[tuple[str, str]],
+    operation_name: str,
+    attempts: int = 5,
+) -> Any:
+    last_error: Exception | None = None
+
+    for attempt in range(1, attempts + 1):
+        try:
+            result = await structured_llm.ainvoke(messages)
+            if result is not None:
+                return result
+            logger.warning("%s returned no structured output on attempt %s.", operation_name, attempt)
+        except Exception as exc:
+            last_error = exc
+            if not _is_retryable_deepseek_error(exc) or attempt == attempts:
+                raise
+            logger.warning("%s hit a transient DeepSeek structured-output error on attempt %s.", operation_name, attempt)
+
+        await asyncio.sleep(min(2**attempt, 12))
+
+    if last_error:
+        raise last_error
+
+    raise RuntimeError(f"{operation_name} did not return structured output.")
+
+
+def _is_retryable_deepseek_error(error: Exception) -> bool:
+    message = str(error)
+    return (
+        "deepseek-v4-pro" in message
+        and "bad_request" in message
+        and "yescale_api_error" in message
+    )

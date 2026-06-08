@@ -11,7 +11,7 @@ from fastapi import HTTPException
 from langchain_core.exceptions import OutputParserException
 from pydantic import ValidationError
 
-from app.core.llm import LLMFactory
+from app.core.llm import LLMFactory, ainvoke_structured_with_retry
 from app.schemas.result import ComparisonAnalysisResponse, SkillGap
 from app.schemas.cv import FilteredCVResponse
 from app.schemas.jd import JDResponse, JDSkillRequirement
@@ -101,16 +101,14 @@ class AnalysisService:
             raise HTTPException(status_code=500, detail="Analysis service is busy. Please try again later.")
 
     async def _invoke_structured_output(self, human_message: str) -> ComparisonAnalysisResponse:
-        for attempt in range(2):
-            result = await self.structured_llm.ainvoke([
+        return await ainvoke_structured_with_retry(
+            self.structured_llm,
+            [
                 ("system", self.system_message),
                 ("human", human_message),
-            ])
-            if result is not None:
-                return result
-            logger.warning("Comparison returned no structured output on attempt %s", attempt + 1)
-
-        raise HTTPException(status_code=502, detail="AI did not return a comparison result.")
+            ],
+            "Comparison",
+        )
 
     def _normalize_analysis_score(
         self,

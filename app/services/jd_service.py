@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from langchain_core.exceptions import OutputParserException
 from pydantic import ValidationError
 
-from app.core.llm import LLMFactory
+from app.core.llm import LLMFactory, ainvoke_structured_with_retry
 from app.schemas.jd import JDResponse
 
 logger = logging.getLogger("uvicorn.error")
@@ -49,16 +49,14 @@ class JdService:
             return "You are an expert recruiter. Extract job description details accurately into the requested JSON format."
 
     async def _invoke_structured_output(self, raw_text: str) -> JDResponse:
-        for attempt in range(2):
-            result = await self.structured_llm.ainvoke([
+        return await ainvoke_structured_with_retry(
+            self.structured_llm,
+            [
                 ("system", self.system_message),
                 ("human", raw_text),
-            ])
-            if result is not None:
-                return result
-            logger.warning("JD extraction returned no structured output on attempt %s", attempt + 1)
-
-        raise HTTPException(status_code=502, detail="AI did not return a JD extraction result.")
+            ],
+            "JD extraction",
+        )
 
     async def extract_jd_data(self, raw_text: str) -> JDResponse:
         try:
