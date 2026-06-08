@@ -17,7 +17,7 @@ load_dotenv()
 
 class CvService:
     def __init__(self):
-        self.llm = LLMFactory.get_model("gpt-4o-mini")
+        self.llm = LLMFactory.get_model("deepseek-v4-pro")
         self.structured_llm = self.llm.with_structured_output(
             CVResponse,
             method="function_calling",

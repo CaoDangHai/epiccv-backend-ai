@@ -17,7 +17,7 @@ load_dotenv()
 
 class RoadmapService:
     def __init__(self):
-        self.llm = LLMFactory.get_model("gpt-4.1-mini")
+        self.llm = LLMFactory.get_model("deepseek-v4-pro")
         self.structured_llm = self.llm.with_structured_output(
             LearningRoadmapResponse,
             method="function_calling",

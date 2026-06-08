@@ -13,6 +13,7 @@ class LLMFactory:
     _instances = {}
 
     YES_SCALE_MODELS = {
+        "deepseek-v4-pro": {"temp": 0},
         "gpt-4o": {"temp": 0.2},
         "gpt-4.1-mini": {"temp": 0},
         "gpt-4o-mini": {"temp": 0},
