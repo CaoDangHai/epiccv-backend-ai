@@ -118,3 +118,4 @@ async def full_analysis_pipeline(cv_file: UploadFile = File(...), jd_file: Uploa
     except Exception as e:
         logger.error(f"Full pipeline endpoint error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Full pipeline failed: {str(e)}")
+            
